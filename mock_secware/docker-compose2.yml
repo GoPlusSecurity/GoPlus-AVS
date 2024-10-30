@@ -1,0 +1,11 @@
+version: "3.8"
+
+networks:
+  default:
+    name: secware-1-1
+
+services:
+  secware-api:
+    image: docker.io/joker1034/secware:linuxamd64
+    ports:
+      - "${SECWARE_PORT}:8002"

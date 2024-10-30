@@ -1,0 +1,11 @@
+version: "3.8"
+
+networks:
+  default:
+    name: secware-1-1
+
+services:
+  secware-api:
+    image: secware-1-1
+    ports:
+      - "${SECWARE_PORT}:3333"

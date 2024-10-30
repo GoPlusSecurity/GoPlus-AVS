@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+  avs:
+    image: goplus_avs:latest
+    container_name: goplus-avs
+    volumes:
+      - ${CONFIG_FILE_PATH}:${CONFIG_FILE_PATH}
+      - ${COMPOSE_FILE_PATH}:${COMPOSE_FILE_PATH}
+      - /var/run/docker.sock:/var/run/docker.sock
+    command:
+      - "/bin/sh"
+      - "-c"
+      - "/app/avs start -c ${CONFIG_FILE_PATH}"
+    restart: unless-stopped
+    network_mode: "host"
+
+  avs_prometheus:
+    image: prom/prometheus
+    container_name: goplus-avs-prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=200h"
+      - "--web.enable-lifecycle"
+    ports:
+      - "9090:9090"
+      - "9999:9999"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - goplus_avs_prom_data:/prometheus
+    restart: unless-stopped
+    network_mode: "host"
+
+  avs_grafana:
+    image:  grafana/grafana
+    container_name: goplus-avs-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - goplus_avs_grafana_data:/var/lib/grafana
+      - ./avs/metrics/provisioning:/etc/grafana/provisioning
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=goplus_avs
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    network_mode: "host"
+
+volumes:
+  goplus_avs_prom_data: {}
+  goplus_avs_grafana_data: {}

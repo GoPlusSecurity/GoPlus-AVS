@@ -1,0 +1,4 @@
+[submodule "avs/contracts/eigenlayer-middleware"]
+	path = avs/contracts/eigenlayer-middleware
+	url = https://github.com/Layr-Labs/eigenlayer-middleware
+	branch = v0.2.1-mainnet-rewards
