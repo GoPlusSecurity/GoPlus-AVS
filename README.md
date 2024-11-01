@@ -1,158 +1,173 @@
 # GoPlus AVS
 
-## 总览
-- 如果要在 Holesky testnet 上启动 GoPlus AVS，请参考文档 `deployment.md`
-- 如果要开发 GoPlus AVS 的后台与合约，请参考本文档。
-- 如果要部署 GoPlus AVS 到 mainnet，需要明确一些基础设定：
-  - Deployer
-  - ProxyAdmin owner
-  - Pauser group
-  - ChurnApprover
-  - Ejector
-  - Quorum
-    - OperatorSetParam
-    - StrategyParam
-    - MinimumStake
+## Directory Structure
 
-## 目录结构
-采用多 mod 的模式。由 `./go.work` 描述。
+Uses a multi-module (`mod`) pattern, described by `./go.work`.
 
-- `./shared` 一个独立的Go模块，定义了各组件交互的数据结构和通用功能，比如签名和验证过程。请重点关注其中的结构体定义。
-- `./avs` 一个独立的Go模块，定义了AVS的功能。
-- `./mock_secware` 一个独立的Go模块，定义了假想的 SecWare 职能。
-- `./mock_gateway` 一个独立的Go模块，定义了假想的 Gateway 职能。提供与生产环境中 GoPlus Gateway 相同的接口。
-- `./mock_fanout_service` 一个独立的Go模块，定义了假想的 Fanout Service 职能。提供与 prod 环境中 GoPlus Fanout Service 相同的接口。
-- 
-- `./scripts` 存放建构和管理 docker 的脚本，以及各个服务组件的运行管理
+- `./shared`: An independent Go module defining data structures and common functionalities for component interactions, such as signing and verification processes. Please pay special attention to the struct definitions within.
+- `./avs`: An independent Go module defining the functionalities of AVS.
+- `./mock_secware`: An independent Go module defining the hypothetical functions of SecWare.
+- `./mock_gateway`: An independent Go module defining the hypothetical functions of Gateway. Provides interfaces identical to those in the production GoPlus Gateway environment.
+- `./mock_fanout_service`: An independent Go module defining the hypothetical functions of Fanout Service. Provides interfaces identical to those in the production GoPlus Fanout Service environment.
+- `./scripts`: Stores scripts for building and managing Docker, as well as running and managing various service components.
 
-## 重要的模块级接口
+## Important Module-Level Interfaces
 
 ### Gateway
 
-Gateway 输入来自 End user 的已签名交易 `shared/pkg/types.SignedTx`，读取 End user 对于此交易的 Secware 配置信息，构造多个 `shared/pkg/types.SecwareTask`，每个对应于一个 Secware。 
+The Gateway inputs a signed transaction `shared/pkg/types.SignedTx` from the end user, reads the Secware configuration information of the end user for this transaction, and constructs multiple `shared/pkg/types.SecwareTask`, each corresponding to a Secware.
 
 ```go
-// SecwareTask 即将由指定的Secware执行的任务
+// SecwareTask is the task to be executed by the specified Secware
 type SecwareTask struct {
-	SecwareId      int      `json:"secware_id"`
-	SecwareVersion int      `json:"secware_version"`
-	SignedTx       HexBytes `json:"signed_tx"`  // 即将发往目标链的已签名交易
-	StartTime      HexInt64 `json:"start_time"` // 任务的开始时间
-	EndTime        HexInt64 `json:"end_time"`   // 任务的截止时间
-	Args           string   `json:"args"`       // json string 形式，提供具体 Secware 所需的额外参数
+    SecwareId      int      `json:\"secware_id\"`
+    SecwareVersion int      `json:\"secware_version\"`
+    SignedTx       HexBytes `json:\"signed_tx\"`  // The signed transaction to be sent to the target chain
+    StartTime      HexInt64 `json:\"start_time\"` // Task start time
+    EndTime        HexInt64 `json:\"end_time\"`   // Task deadline
+    Args           string   `json:\"args\"`       // Additional parameters required by specific Secware, in JSON string format
 }
 ```
 
-Gateway 将 `[]SecwareTask` 发送给 Fanout service。
+The Gateway sends `[]SecwareTask` to the Fanout Service.
 
-### Fanout service
+### Fanout Service
 
-Fanout service 接到来自 Gateway 的 `[]SecwareTask` 后，使用 Gateway 的私钥进行对数组中的每一个元素进行签名，从而得到一组 `shared/pkg/types.SignedSecwareTask`，其中 Operator 字段不填。
+After receiving `[]SecwareTask` from the Gateway, the Fanout Service uses the Gateway's private key to sign each element in the array, resulting in a set of `shared/pkg/types.SignedSecwareTask`, where the `Operator` field is left empty.
 
 ```go
-// SignedSecwareTask 被 Gateway 签名的 SecwareTask，是 Secware 的完整输入
+// SignedSecwareTask is the SecwareTask signed by the Gateway, which is the complete input for the Secware
 type SignedSecwareTask struct {
-	Operator   HexBytes    `json:"operator,omitempty"` // Operator 的地址
-	Task       SecwareTask `json:"task"`
-	SigGateway HexBytes    `json:"sig_gateway"` // Gateway 对 Task 的签名
+    Operator   HexBytes    `json:\"operator,omitempty\"` // Operator's address
+    Task       SecwareTask `json:\"task\"`
+    SigGateway HexBytes    `json:\"sig_gateway\"` // Gateway's signature on the Task
 }
 ```
-Fanout service 需要基于 Fanout policy 选择出一组 Operator 进行，将 `[]SignedSecwareTask` 发送给组中的每一个 Operator。
+
+The Fanout Service needs to select a group of Operators based on the Fanout policy and send `[]SignedSecwareTask` to each Operator in the group.
 
 ### Operator
 
-Operator 收到来自 Fanout service 的 `[]SignedSecwareTask` 后，对其中每个元素执行：
+After receiving `[]SignedSecwareTask` from the Fanout Service, the Operator executes the following for each element:
 
-1. 填写自身的 Operator 链上地址到 `SignedSecwareTask.Operator` 字段；
-2. 依据 `SignedSecwareTask.Task` 中描述的 `(SecwareId, SecwareVersion)`，将每个 `SignedSecwareTask` 发送给对应的 Secware。
-
+1. Fills its own on-chain Operator address into the `SignedSecwareTask.Operator` field.
+2. According to the `(SecwareId, SecwareVersion)` described in `SignedSecwareTask.Task`, sends each `SignedSecwareTask` to the corresponding Secware.
 
 ### Secware
 
-Secware 收到来自 Operator 的 `SignedSecwareTask` 后，执行：
+After receiving `SignedSecwareTask` from the Operator, the Secware executes:
 
-1. 验证 `SignedSecwareTask.SigGateway` 是否合法；
-2. 验证 `(SecwareId, SecwareVersion)` 是否与自身一致；
-3. 解析 JSON 格式的额外参数 `SecwareTask.Args`；
-4. 执行 Task；
-5. 将结果写入 `shared/pkg/types.SecwareResult`；
-6. 结合 Operator 地址以及执行结果，对 `SecwareResult` 用自身私钥计算 HMAC，填入 `SecwareResult.SigSecware` 字段；
-7. 将 `SecwareResult` 返回给 Operator。
+1. Verifies whether `SignedSecwareTask.SigGateway` is valid.
+2. Verifies whether `(SecwareId, SecwareVersion)` matches itself.
+3. Parses the extra parameters in JSON format from `SecwareTask.Args`.
+4. Executes the Task.
+5. Writes the result into `shared/pkg/types.SecwareResult`.
+6. Combines the Operator address and execution result to compute an HMAC on `SecwareResult` using its own private key, and fills it into the `SecwareResult.SigSecware` field.
+7. Returns `SecwareResult` to the Operator.
 
 ```go
-// SecwareResult 的各个字段正常情况下由 Secware 填写，Timeout/Crash 时由 Operator 填写。
+// SecwareResult fields are normally filled by the Secware; in case of Timeout/Crash, they are filled by the Operator.
 type SecwareResult struct {
-	Code     int      `json:"code"`     // 状态码 0: 正常，1: 超时，2: Crash，>=3: Secware自由使用，表示此交易不安全的各种状态
-	Message  string   `json:"message"`  // 状态描述
-	Details  string   `json:"result"`   // json string 形式，Secware 输出详细结果。即使没有，也要填写空 JSON `{}`
-	Operator HexBytes `json:"operator"` // Operator 地址。用于 Secware 生成 HMAC
+    Code     int      `json:\"code\"`     // Status code: 0 - Normal, 1 - Timeout, 2 - Crash, >=3 - Used freely by Secware to indicate various unsafe states of the transaction
+    Message  string   `json:\"message\"`  // Status description
+    Details  string   `json:\"result\"`   // Detailed result output by Secware in JSON string format. Even if empty, should be filled with an empty JSON '{}'
+    Operator HexBytes `json:\"operator\"` // Operator's address. Used by Secware to generate HMAC
 }
 
-// SignedSecwareResult 是加入了 Secware 计算的 HMAC 后的完整结果
+// SignedSecwareResult is the complete result after adding the HMAC computed by Secware
 type SignedSecwareResult struct {
-	Result     SecwareResult `json:"result"`
-	SigSecware HexBytes      `json:"sig_secware,omitempty"` // 由 SecwareResult 和 Secware私钥 计算出的 HMAC-SHA256
+    Result     SecwareResult `json:\"result\"`
+    SigSecware HexBytes      `json:\"sig_secware,omitempty\"` // HMAC-SHA256 computed from SecwareResult and Secware's private key
 }
 ```
 
-### Operator 提交结果
+### Operator Submitting Results
 
-最终 Operator 会在 `SecwareTask.EndTime` 之前执行：
+Finally, the Operator will, before `SecwareTask.EndTime`:
 
-1. 将各个 Secware 执行的结果（含 Timeout / Crash）进行汇总，每个 Secware 对应一个 `SecwareResult`；
-2. Operator 对 `[]SecwareResult` 的内容用自己私钥进行签名；
-3. 填写 `shared/pkg/types.SignedOperatorResult` 结构体，将其发送给 Gateway。
+1. Summarize the execution results from each Secware (including Timeout/Crash), where each Secware corresponds to a `SecwareResult`.
+2. Sign the contents of `[]SecwareResult` using its own private key.
+3. Fill the `shared/pkg/types.SignedOperatorResult` structure and send it to the Gateway.
 
-### Gateway 汇总结果
+### Gateway Summarizing Results
 
-Gateway 在每个 `SecwareTask.EndTime` 之前等待并汇总 Operator 提交的执行结果。然后执行：
+The Gateway waits and summarizes the execution results submitted by Operators before each `SecwareTask.EndTime`. Then it performs:
 
-1. 补全未响应的 Operator 的结果；
-2. 计算共识；
-3. 如果共识结果为安全，则会转发 `SignedTx` 到目标网络，等待并收集目标网络执行结果；
-4. 将各个步骤的执行结果汇总返回给 End user。
+1. Completes the results of Operators that did not respond.
+2. Computes consensus.
+3. If the consensus result is safe, it will forward `SignedTx` to the target network, wait for and collect the execution results from the target network.
+4. Summarizes the execution results of each step and returns them to the end user.
 
-## 签名方式
+## Signing Methods
 
-### Gateway 签名
+### Gateway Signature
 
-按 `SecwareTask` 字段声明的顺序进行 JSON 序列化，字段间不留空格。同时 `HexBytes` 和 `HexInt64` 类型的字段都编码为 `0x` 开头的字符串。`HexBytes` 即使为空，也保留 `0x`。
-对 JSON 序列化后的 `[]byte` 取 SHA3，然后做 ECDSA 签名。这个过程跟 go-ethereum 中的签名流程相同。 
+Serialize `SecwareTask` in JSON according to the order of field declarations, without spaces between fields. Fields of types `HexBytes` and `HexInt64` are encoded as strings starting with `0x`. Even if `HexBytes` is empty, it retains `0x`.
 
-### Operator 签名
+Compute the SHA3 hash of the serialized `[]byte`, then perform an ECDSA signature. This process is the same as the signing process in go-ethereum.
 
-同 Gateway 签名，只不过对象为 `SignedSecwareResult`。 
+### Operator Signature
+
+Same as the Gateway signature, but the object is `SignedSecwareResult`.
 
 ### Secware HMAC
 
-将 `SecwareResult` 按字段声明的顺序进行 JSON 序列化为 `msg`，以此版本的 Secware 持有的私钥为 `key`，计算 `HMAC-SHA256(msg, key)`。
+Serialize `SecwareResult` in JSON according to the order of field declarations to get `msg`, use the private key held by this version of Secware as `key`, compute `HMAC-SHA256(msg, key)`.
 
-## Secware 版本更新流程
+## Secware Version Update Process
 
-Operator 定期向 Gateway 请求目前启用的各个 `(SecwareId, SecwareVersion)`，发现
-- 自己并不持有的 pair 时，去拉取 docker images；
-- 自己已经启动但 Gateway 返回列表中没有的 pair 时，关闭对应的 docker compose。
+Operators regularly request the currently enabled `(SecwareId, SecwareVersion)` pairs from the Gateway, and find:
+
+- If there are pairs they don't hold, they pull the Docker images.
+- If there are pairs they've already started but are not in the list returned by the Gateway, they shut down the corresponding Docker compose.
 
 ## mock_secware
 
-- 配置: `./mock_secware/pkg/config/config.go`
-- 入口: `./mock_secware/cmd/main.go`
-- 测试: `./mock_secware/test/task_test.go`
+- **Configuration**: `./mock_secware/pkg/config/config.go`
+- **Entry point**: `./mock_secware/cmd/main.go`
+- **Test**: `./mock_secware/test/task_test.go`
 
-HTTP RPC 的输入为 `defs.SignedSecwareTask`，可通过 `defs.SignedSecwareTask.Args` 来提前定义 mock_secware 的行为。
-`Args` 字段为 `mock_secware/handlers.SecwarerArgs` 的 JSON 序列化的只。 
+The input of the HTTP RPC is `defs.SignedSecwareTask`, and you can predefine the behavior of `mock_secware` through `defs.SignedSecwareTask.Args`.
+
+The `Args` field is the JSON serialization of `mock_secware/handlers.SecwarerArgs`.
 
 ```go
-// SecwarerArgs 是提供给 mock_secware 的额外参数，来自 SignedSecwareTask.Task.Args (JSON)
-// - result: string 表示预先指定 mock_secware 返回的安全审查结果, 供调试使用, 比如 "Yes", "No", ...
-// - sleep: int  表示 mock_secware 执行动作前等待的时长（秒）
-// - crash: bool 表示 mock_secware 是否忽略 return 而主动崩溃
+// SecwarerArgs are additional parameters provided to mock_secware, coming from SignedSecwareTask.Task.Args (JSON)
+// - result: string, indicates the predefined security audit result returned by mock_secware, used for debugging, such as \"Yes\", \"No\", etc.
+// - sleep: int, indicates the duration (in seconds) that mock_secware waits before executing actions
+// - crash: bool, indicates whether mock_secware ignores the return and actively crashes
 type SecwarerArgs struct {
-	Result defs.HexBytes `json:"result,omitempty"`
-	Sleep  int           `json:"sleep,omitempty"`
-	Crash  bool          `json:"crash,omitempty"`
+    Result defs.HexBytes `json:\"result,omitempty\"`
+    Sleep  int           `json:\"sleep,omitempty\"`
+    Crash  bool          `json:\"crash,omitempty\"`
 }
 ```
 
+---
 
+## Holesky Deployment
 
+```
+Deployer: 0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939
+GoPlusProxyAdmin: 0xdf9EE7B28fef9aEe47f52DeA24e6eBEfECc9EaC2
+    owner: 0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939
+GoPlusServiceManager: 0xC3c5934686254A59C3B9ce40CFa9F36c1a0BeFf9
+    Impl: 0x7e186EbCe5c31D297A478639E7dF8bfe4b075b3A
+    owner: 0xdf9EE7B28fef9aEe47f52DeA24e6eBEfECc9EaC2
+RegistryCoordinator: 0x3C503C651e3BD82C7AD169411E674d8ea6ad07e6
+    Impl: 0x07510c426105e3023aB859764532e687543f1Fe2
+BLSApkRegistry: 0xf89d6536994682260b8D98349218eF6cb0159824
+    Impl: 0xA01c421b15345085b55b1d9c0Be01104e6DdA85F
+IndexRegistry: 0xCce02fb16b1F9893951DD49Ecd5941BcC4Ef8D5A
+    Impl: 0x1e43Dc9046f2D1C00Fa8bb506F19B3103c4f567A
+StakeRegistry: 0x0965C97ED9DBB76a102b4F1fa1A5dBA2cBd802f0
+    Impl: 0xde530efef354F6D2cA18867adf271610Dd22b1f5
+OperatorStateRetriever: 0x5ce26317F7edCBCBD1a569629af5DC41c1622045
+PauserRegistry: 0xc2284B80Cf95BaD900dd0c31d0a4660b3A4Bb8cC
+    Constructor parameters: [0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939], 0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939
+```
+
+`ServiceManager` and `ECDSAStakeRegistry` are TUP contracts; the former handles the creation and response of Tasks and interacts with EigenLayer. The latter provides the joining and exiting of Operators.
+
+Both of these TUP contracts have `ProxyAdmin` as the owner, and the owner of `ProxyAdmin` is the `deployer`."
+                    
