@@ -620,7 +620,6 @@ contract GoPlusDeployer is Script, Utils {
             );
 
             address gatewayAddress = 0xfa2b8075362d1c6cd7c48306b68546482dac72c4;
-            
             string memory gatewayURI = "https://avs.gopluslabs.io/api/v1";
             goPlusProxyAdmin.upgradeAndCall(
                 TransparentUpgradeableProxy(payable(address(goPlusServiceManager))),
@@ -639,7 +638,7 @@ contract GoPlusDeployer is Script, Utils {
                 address(goPlusServiceManagerImplementation),
                 abi.encodeWithSelector(
                     IServiceManager.updateAVSMetadataURI.selector,
-                    "https://raw.githubusercontent.com/user_name/repo_name/main/avs_metadata.json"
+                    "https://avs.gopluslabs.io/avs_metadata.json"
                 )
             );
         }
