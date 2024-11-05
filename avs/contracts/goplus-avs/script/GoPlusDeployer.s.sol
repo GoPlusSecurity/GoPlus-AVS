@@ -590,7 +590,7 @@ contract GoPlusDeployer is Script, Utils {
             });
 
             quorumsStrategyParams[2][0] = IStakeRegistry.StrategyParams({
-                strategy: IStrategy(0xAD76D205564f955A9c18103C4422D1Cd94016899),  // reALT
+                strategy: IStrategy(0x6075546538c3eFbD607ea6aFC24149fCcFb2edF4),  // reALT
                 multiplier: 1 ether
             });
             
