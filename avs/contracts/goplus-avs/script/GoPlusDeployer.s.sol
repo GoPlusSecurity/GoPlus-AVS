@@ -638,7 +638,7 @@ contract GoPlusDeployer is Script, Utils {
                 address(goPlusServiceManagerImplementation),
                 abi.encodeWithSelector(
                     IServiceManager.updateAVSMetadataURI.selector,
-                    "https://avs.gopluslabs.io/avs_metadata.json"
+                    "https://static2.gopluslabs.io/avs_metadata.json"
                 )
             );
         }
