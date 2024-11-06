@@ -8,6 +8,7 @@ import (
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/avsregistry"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
+	regcoord "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RegistryCoordinator"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	eigenSdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -58,8 +59,14 @@ func registerWithAVS(cliCtx *cli.Context) error {
 
 	txMgr := txmgr.NewSimpleTxManager(skWallet, cfg.EthHttpClient, cfg.Logger, opAddr)
 
-	// hardcode these things for now
-	quorumNumbers := eigenSdkTypes.QuorumNums{eigenSdkTypes.QuorumNum(0)}
+	var quorumNumbers eigenSdkTypes.QuorumNums
+	for _, q := range cfg.QuorumNums {
+		quorumNumbers = append(quorumNumbers, eigenSdkTypes.QuorumNum(q))
+	}
+
+	if len(quorumNumbers) != 1 || quorumNumbers[0] != 0 {
+		panic("Only quorum[0] is available now.")
+	}
 
 	socket := types.OperatorSocket{
 		NodeClass: cfg.NodeClass,
@@ -90,21 +97,6 @@ func registerWithAVS(cliCtx *cli.Context) error {
 	sigValidForSeconds := int64(1_000_000)
 	operatorToAvsRegistrationSigExpiry := big.NewInt(int64(curBlock.Time) + sigValidForSeconds)
 
-	//contractRegistryCoordinator, err := regcoord.NewContractRegistryCoordinator(cfg.RegCoordinatorAddr, cfg.EthHttpClient)
-	//if err != nil {
-	//	return err
-	//}
-	//serviceManagerAddr, err := contractRegistryCoordinator.ServiceManager(&bind.CallOpts{})
-	//if err != nil {
-	//	return err
-	//}
-
-	//goPlusServiceManager, err := contractGoPlusServiceManager.NewGoPlusServiceManager(serviceManagerAddr, cfg.EthHttpClient)
-	//if err != nil {
-	//	cfg.Logger.Error("Failed to fetch IServiceManager contract", "err", err)
-	//	return err
-	//}
-
 	avsRegistryWriter, err := avsregistry.NewWriterFromConfig(avsregistry.Config{
 		RegistryCoordinatorAddress:    cfg.RegCoordinatorAddr,
 		OperatorStateRetrieverAddress: cfg.OperatorStateRetrieverAddr,
@@ -128,6 +120,69 @@ func registerWithAVS(cliCtx *cli.Context) error {
 		return err
 	}
 	cfg.Logger.Infof("Registered operator with avs registry coordinator.")
+
+	return nil
+}
+
+func deregisterWithAVS(cliCtx *cli.Context) error {
+	cfg, err := config.NewConfig(cliCtx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	opAddr, err := signature.GetAddressFromPrivateKey(cfg.SkOperator)
+	if err != nil {
+		cfg.Logger.Fatal("Failed to calculate operator address.")
+		return err
+	}
+	chainId, err := cfg.EthHttpClient.ChainID(cliCtx.Context)
+	if err != nil {
+		cfg.Logger.Fatal("Failed to get ChainID.")
+		return err
+	}
+
+	signerV2 := func(ctx context.Context, address common.Address) (bind.SignerFn, error) {
+		return signerv2.PrivateKeySignerFn(cfg.SkOperator, chainId)
+	}
+
+	skWallet, err := wallet.NewPrivateKeyWallet(cfg.EthHttpClient, signerV2, opAddr, cfg.Logger)
+	if err != nil {
+		panic(err)
+	}
+
+	txMgr := txmgr.NewSimpleTxManager(skWallet, cfg.EthHttpClient, cfg.Logger, opAddr)
+
+	avsRegistryWriter, err := avsregistry.NewWriterFromConfig(avsregistry.Config{
+		RegistryCoordinatorAddress:    cfg.RegCoordinatorAddr,
+		OperatorStateRetrieverAddress: cfg.OperatorStateRetrieverAddr,
+	}, cfg.EthHttpClient, txMgr, cfg.Logger)
+	if err != nil {
+		cfg.Logger.Fatal("Failed to crete avsRegistryWriter")
+		return err
+	}
+
+	var quorumNumbers eigenSdkTypes.QuorumNums
+	for _, q := range cfg.QuorumNums {
+		quorumNumbers = append(quorumNumbers, eigenSdkTypes.QuorumNum(q))
+	}
+
+	g1Point := cfg.BLSKeypair.GetPubKeyG1()
+	bn254G1Point := regcoord.BN254G1Point{
+		X: g1Point.X.BigInt(big.NewInt(0)),
+		Y: g1Point.Y.BigInt(big.NewInt(0)),
+	}
+
+	_, err = avsRegistryWriter.DeregisterOperator(
+		context.Background(),
+		quorumNumbers,
+		bn254G1Point,
+	)
+
+	if err != nil {
+		cfg.Logger.Errorf("Unable to deregister operator with avs registry coordinator")
+		return err
+	}
+	cfg.Logger.Infof("Deregistered operator with avs registry coordinator.")
 
 	return nil
 }
