@@ -37,6 +37,12 @@ func main() {
 				Action: registerWithAVS,
 				Flags:  flags,
 			},
+			{
+				Name:   "deregister-with-avs",
+				Usage:  "Deregister current operator from GoPlusAVS",
+				Action: deregisterWithAVS,
+				Flags:  flags,
+			},
 		},
 	}
 

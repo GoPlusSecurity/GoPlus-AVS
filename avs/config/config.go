@@ -31,6 +31,7 @@ type RawConfig struct {
 	ETHRpc                     string `mapstructure:"ETH_RPC"`
 	RegCoordinatorAddr         string `mapstructure:"REGISTRY_COORDINATOR_ADDR"`
 	OperatorStateRetrieverAddr string `mapstructure:"OPERATOR_STATE_RETRIEVER"`
+	QuorumNums                 []int  `mapstructure:"QUORUM_NUMS"`
 }
 
 func (r *RawConfig) isValid() error {
@@ -67,6 +68,10 @@ func (r *RawConfig) isValid() error {
 	if r.OperatorStateRetrieverAddr == "" {
 		return fmt.Errorf("operator state retriever address is required")
 	}
+	if len(r.QuorumNums) == 0 {
+		return fmt.Errorf("quorum nums is required")
+	}
+
 	return nil
 }
 
@@ -89,6 +94,8 @@ type Config struct {
 	NodeClass   string
 	OperatorURL string
 	APIPort     int
+
+	QuorumNums []int
 }
 
 func getRawConfigFromFile(filePath string) (RawConfig, error) {
@@ -145,6 +152,10 @@ func getRawConfigFromEnv() (RawConfig, error) {
 		return RawConfig{}, err
 	}
 	err = viper.BindEnv("OPERATOR_STATE_RETRIEVER")
+	if err != nil {
+		return RawConfig{}, err
+	}
+	err = viper.BindEnv("QUORUM_NUMS")
 	if err != nil {
 		return RawConfig{}, err
 	}
@@ -250,5 +261,7 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		NodeClass:   rawConfig.NodeClass,
 		OperatorURL: rawConfig.OperatorURL,
 		APIPort:     rawConfig.APIPort,
+
+		QuorumNums: rawConfig.QuorumNums,
 	}, nil
 }
