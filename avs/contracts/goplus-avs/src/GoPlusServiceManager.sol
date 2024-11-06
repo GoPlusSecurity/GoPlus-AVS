@@ -25,7 +25,7 @@ contract GoPlusServiceManager is ServiceManagerBase {
     {
     }
 
-    function initialize(address initialOwner, address _gatewayAddr, string memory _gatewayURI) public virtual initializer {
+    function initialize(address initialOwner, address _gatewayAddr, string memory _gatewayURI, string memory _metadataURI) public virtual initializer {
         __ServiceManagerBase_init(initialOwner);
         require(_gatewayAddr != address(0), "Gateway address cannot be zero");
         gatewayAddr = _gatewayAddr;
@@ -33,6 +33,9 @@ contract GoPlusServiceManager is ServiceManagerBase {
 
         emit GatewayAddressUpdated(address(0), _gatewayAddr);
         emit GatewayURIUpdated("", _gatewayURI);
+
+        _avsDirectory.updateAVSMetadataURI(_metadataURI);
+
     }
 
     function updateGatewayAddress(address _gatewayAddr) external onlyOwner {
