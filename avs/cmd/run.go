@@ -64,6 +64,10 @@ func registerWithAVS(cliCtx *cli.Context) error {
 		quorumNumbers = append(quorumNumbers, eigenSdkTypes.QuorumNum(q))
 	}
 
+	if len(quorumNumbers) != 1 || quorumNumbers[0] != 0 {
+		panic("Only quorum[0] is available now.")
+	}
+
 	socket := types.OperatorSocket{
 		NodeClass: cfg.NodeClass,
 		URL:       cfg.OperatorURL,
@@ -92,21 +96,6 @@ func registerWithAVS(cliCtx *cli.Context) error {
 	}
 	sigValidForSeconds := int64(1_000_000)
 	operatorToAvsRegistrationSigExpiry := big.NewInt(int64(curBlock.Time) + sigValidForSeconds)
-
-	//contractRegistryCoordinator, err := regcoord.NewContractRegistryCoordinator(cfg.RegCoordinatorAddr, cfg.EthHttpClient)
-	//if err != nil {
-	//	return err
-	//}
-	//serviceManagerAddr, err := contractRegistryCoordinator.ServiceManager(&bind.CallOpts{})
-	//if err != nil {
-	//	return err
-	//}
-
-	//goPlusServiceManager, err := contractGoPlusServiceManager.NewGoPlusServiceManager(serviceManagerAddr, cfg.EthHttpClient)
-	//if err != nil {
-	//	cfg.Logger.Error("Failed to fetch IServiceManager contract", "err", err)
-	//	return err
-	//}
 
 	avsRegistryWriter, err := avsregistry.NewWriterFromConfig(avsregistry.Config{
 		RegistryCoordinatorAddress:    cfg.RegCoordinatorAddr,
