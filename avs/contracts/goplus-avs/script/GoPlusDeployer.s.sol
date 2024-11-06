@@ -50,343 +50,18 @@ contract GoPlusDeployer is Script, Utils {
     GoPlusServiceManager public goPlusServiceManager;
     IServiceManager public goPlusServiceManagerImplementation;
 
-
-    // Deploy GoPlus AVS contracts to Holesky testnet
-    function runHolesky() external {
-        // Define EL core contracts
-        IAVSDirectory avsDirectory = IAVSDirectory(0x055733000064333CaDDbC92763c58BF0192fFeBf);
-        IDelegationManager delegationManager = IDelegationManager(0xA44151489861Fe9e3055d95adC98FbD462B948e7);
-
-        // Define GoPlus accounts
-        // Replace them with multi-sig accounts
-        address goPlusCommunityMultisig = 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266;  // Hardhat account #0
-        address goPlusPauser = 0x70997970C51812dc3A010C7d01b50e0d17dc79C8;  // Hardhat account #1
-
-        vm.startBroadcast();
-
-        // deploy proxy admin for ability to upgrade proxy contracts
-        {
-            goPlusProxyAdmin = new ProxyAdmin();
-        }
-
-        // deploy pauser registry
-        {
-            address[] memory pausers = new address[](2);
-            pausers[0] = goPlusPauser;
-            pausers[1] = goPlusCommunityMultisig;
-            goPlusPauserReg = new PauserRegistry(pausers, goPlusCommunityMultisig);
-        }
-
-        // deploy empty contract
-        EmptyContract emptyContract = new EmptyContract();
-
-        // deploy upgradeable proxy contracts that **will point** to the implementations. Since the implementation contracts are
-        // not yet deployed, we give these proxies an empty contract as the initial implementation, to act as if they have no code.
-        goPlusServiceManager = GoPlusServiceManager(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(goPlusProxyAdmin),
-                    ""
-                )
-            )
-        );
-
-        registryCoordinator = regcoord.RegistryCoordinator(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(goPlusProxyAdmin),
-                    ""
-                )
-            )
-        );
-        blsApkRegistry = IBLSApkRegistry(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(goPlusProxyAdmin),
-                    ""
-                )
-            )
-        );
-        indexRegistry = IIndexRegistry(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(goPlusProxyAdmin),
-                    ""
-                )
-            )
-        );
-        stakeRegistry = IStakeRegistry(
-            address(
-                new TransparentUpgradeableProxy(
-                    address(emptyContract),
-                    address(goPlusProxyAdmin),
-                    ""
-                )
-            )
-        );
-
-        operatorStateRetriever = new OperatorStateRetriever();
-
-        // Second, deploy the *implementation* contracts, using the *proxy contracts* as inputs
-        {
-            // setup StakeRegistry impl
-            stakeRegistryImplementation = new StakeRegistry(
-                registryCoordinator,
-                delegationManager
-            );
-
-            goPlusProxyAdmin.upgrade(
-                TransparentUpgradeableProxy(payable(address(stakeRegistry))),
-                address(stakeRegistryImplementation)
-            );
-        }
-
-        {
-            // setup BLSApkRegistry impl
-            blsApkRegistryImplementation = new BLSApkRegistry(
-                registryCoordinator
-            );
-
-            goPlusProxyAdmin.upgrade(
-                TransparentUpgradeableProxy(payable(address(blsApkRegistry))),
-                address(blsApkRegistryImplementation)
-            );
-        }
-
-        {
-            // setup IndexRegistry impl
-            indexRegistryImplementation = new IndexRegistry(
-                registryCoordinator
-            );
-
-            goPlusProxyAdmin.upgrade(
-                TransparentUpgradeableProxy(payable(address(indexRegistry))),
-                address(indexRegistryImplementation)
-            );
-        }
-
-        {
-            // setup RegistryCoordinator impl
-            registryCoordinatorImplementation = new regcoord.RegistryCoordinator(
-                goPlusServiceManager,
-                regcoord.IStakeRegistry(address(stakeRegistry)),
-                regcoord.IBLSApkRegistry(address(blsApkRegistry)),
-                regcoord.IIndexRegistry(address(indexRegistry))
-            );
-
-            // setup quorum[0]
-            // replace with proper settings
-            regcoord.IRegistryCoordinator.OperatorSetParam[] memory quorumsOperatorSetParams = new regcoord.IRegistryCoordinator.OperatorSetParam[](1);
-            quorumsOperatorSetParams[0] = regcoord.IRegistryCoordinator.OperatorSetParam({
-                        maxOperatorCount: 10000,
-                        kickBIPsOfOperatorStake: 15000,
-                        kickBIPsOfTotalStake: 100
-            });
-
-            uint96[] memory quorumsMinimumStakes = new uint96[](1);
-            quorumsMinimumStakes[0] = 1 ether;
-
-            IStakeRegistry.StrategyParams[][] memory quorumsStrategyParams = new IStakeRegistry.StrategyParams[][](1);
-            quorumsStrategyParams[0] = new IStakeRegistry.StrategyParams[](3);
-            quorumsStrategyParams[0][0] = IStakeRegistry.StrategyParams({
-                strategy: IStrategy(0x43252609bff8a13dFe5e057097f2f45A24387a84),  // EIGEN
-                multiplier: 1 ether
-            });
-
-            quorumsStrategyParams[0][1] = IStakeRegistry.StrategyParams({
-                strategy: IStrategy(0xAD76D205564f955A9c18103C4422D1Cd94016899),  // reALT
-                multiplier: 1 ether
-            });
-
-            quorumsStrategyParams[0][2] = IStakeRegistry.StrategyParams({
-                strategy: IStrategy(0xbeaC0eeEeeeeEEeEeEEEEeeEEeEeeeEeeEEBEaC0),  // Ether
-                multiplier: 1 ether
-            });
-
-            goPlusProxyAdmin.upgradeAndCall(
-                TransparentUpgradeableProxy(payable(address(registryCoordinator))),
-                address(registryCoordinatorImplementation),
-                abi.encodeWithSelector(
-                    regcoord.RegistryCoordinator.initialize.selector,
-                    goPlusCommunityMultisig,  // _initialOwner
-                    goPlusCommunityMultisig,  // _churnApprover
-                    goPlusCommunityMultisig,  // _ejector
-                    goPlusPauserReg,  // _pauserRegistry
-                    0,  // _initialPausedStatus
-                    quorumsOperatorSetParams,
-                    quorumsMinimumStakes,
-                    quorumsStrategyParams
-                )
-            );
-        }
-
-        {
-            // setup ServiceManager impl
-            goPlusServiceManagerImplementation = new GoPlusServiceManager(
-                avsDirectory,
-                registryCoordinator,
-                stakeRegistry
-            );
-
-            address gatewayAddress = 0xfa2b8075362d1c6cd7c48306b68546482dac72c4;
-            string memory gatewayURI = "https://avs.gopluslabs.io/api/v1";
-            goPlusProxyAdmin.upgradeAndCall(
-                TransparentUpgradeableProxy(payable(address(goPlusServiceManager))),
-                address(goPlusServiceManagerImplementation),
-                abi.encodeWithSelector(
-                    GoPlusServiceManager.initialize.selector,
-                    address(goPlusProxyAdmin),
-                    gatewayAddress,
-                    gatewayURI
-                )
-            );
-
-            // setup AVSMetadataURI
-            goPlusProxyAdmin.upgradeAndCall(
-                TransparentUpgradeableProxy(payable(address(goPlusServiceManager))),
-                address(goPlusServiceManagerImplementation),
-                abi.encodeWithSelector(
-                    IServiceManager.updateAVSMetadataURI.selector,
-                    "https://static2.gopluslabs.io/avs_metadata.json"
-                )
-            );
-        }
-        vm.stopBroadcast();
-
-        // write deployment results to logs
-        console.log("Deployer: %s", msg.sender);
-        console.log("GoPlusProxyAdmin: %s", address(goPlusProxyAdmin));
-        console.log("GoPlusProxyAdmin owner: %s", goPlusProxyAdmin.owner());
-        console.log("GoPlusServiceManager: %s, Impl: %s", address(goPlusServiceManager), address(goPlusServiceManagerImplementation));
-        console.log("RegistryCoordinator: %s, Impl: %s", address(registryCoordinator), address(registryCoordinatorImplementation));
-        console.log("BLSApkRegistry: %s, Impl: %s", address(blsApkRegistry), address(blsApkRegistryImplementation));
-        console.log("IndexRegistry: %s, Impl: %s", address(indexRegistry), address(indexRegistryImplementation));
-        console.log("StakeRegistry: %s, Impl: %s", address(stakeRegistry), address(stakeRegistryImplementation));
-        console.log("OperatorStateRetriever: %s", address(operatorStateRetriever));
-        console.log("GoPlusServiceManager owner: %s", goPlusServiceManager.owner());
-        require(address(goPlusProxyAdmin) == goPlusServiceManager.owner(), "The owner of ServiceManager is incorrect.");
-
-        // write deployment results to JSON
-        string memory parent_object = "addresses";
-        vm.serializeAddress(
-            parent_object,
-            "deployer",
-            address(msg.sender)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "goPlusProxyAdmin",
-            address(goPlusProxyAdmin)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "goPlusProxyAdminOwner",
-            address(goPlusProxyAdmin.owner())
-        );
-        vm.serializeAddress(
-            parent_object,
-            "goPlusServiceManager",
-            address(goPlusServiceManager)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "goPlusServiceManagerOwner",
-            goPlusServiceManager.owner()
-        );
-        vm.serializeAddress(
-            parent_object,
-            "goPlusServiceManagerImplementation",
-            address(goPlusServiceManagerImplementation)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "goPlusCommunityMultisig",
-            address(goPlusCommunityMultisig)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "goPlusPauser",
-            address(goPlusPauser)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "goPlusPauserRegistry",
-            address(goPlusPauserReg)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "churnApprover",
-            address(goPlusCommunityMultisig)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "Ejector",
-            address(goPlusCommunityMultisig)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "registryCoordinator",
-            address(registryCoordinator)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "registryCoordinatorImplementation",
-            address(registryCoordinatorImplementation)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "blsApkRegistry",
-            address(blsApkRegistry)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "blsApkRegistryImplementation",
-            address(blsApkRegistryImplementation)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "indexRegistry",
-            address(indexRegistry)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "indexRegistryImplementation",
-            address(indexRegistryImplementation)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "stakeRegistry",
-            address(stakeRegistry)
-        );
-        vm.serializeAddress(
-            parent_object,
-            "stakeRegistryImplementation",
-            address(stakeRegistryImplementation)
-        );
-        string memory finalJson = vm.serializeAddress(
-            parent_object,
-            "operatorStateRetriever",
-            address(operatorStateRetriever)
-        );
-        writeOutput(finalJson, "goplus_avs_deployment_output");
-    }
-    
     // Deploy GoPlus AVS contracts to mainnet
     function run() external {
         // Define EL core contracts
-        IAVSDirectory avsDirectory = IAVSDirectory(0x135dda560e946695d6f155dacafc6f1f25c1f5af);
+        IAVSDirectory avsDirectory = IAVSDirectory(0x135DDa560e946695d6f155dACaFC6f1F25C1F5AF);
         IDelegationManager delegationManager = IDelegationManager(0x39053D51B77DC0d36036Fc1fCc8Cb819df8Ef37A);
 
         // Define GoPlus accounts
         // Replace them with multi-sig accounts
         address goPlusCommunityMultisig = 0x0A33f7Ad41A2Ed3510EF5a65b6B4397c6307e410;
-        address goPlusPauser = 0xdf40044d40ff0d8f34d43f5cfc3d89c42bbfbde2;  
-        address ejector = 0xbc6ce40a4137f42d14c8cd1aff944000c8921a1d;
-        address churnApprover = 0xa6abe31f70311b59b2f1f0adc9cabd9bdab3dc55;
+        address goPlusPauser = 0xDF40044d40Ff0d8F34D43F5CFC3D89C42bBfbDE2;  
+        address ejector = 0xBc6Ce40A4137F42d14c8CD1afF944000c8921A1D;
+        address churnApprover = 0xA6abe31F70311B59b2f1f0Adc9CaBD9bdAb3dc55;
 
         vm.startBroadcast();
 
@@ -455,7 +130,7 @@ contract GoPlusDeployer is Script, Utils {
             )
         );
 
-        operatorStateRetriever = new OperatorStateRetriever();
+        operatorStateRetriever = OperatorStateRetriever(0xD5D7fB4647cE79740E6e83819EFDf43fa74F8C31);
 
         // Second, deploy the *implementation* contracts, using the *proxy contracts* as inputs
         {
@@ -619,26 +294,15 @@ contract GoPlusDeployer is Script, Utils {
                 stakeRegistry
             );
 
-            address gatewayAddress = 0xfa2b8075362d1c6cd7c48306b68546482dac72c4;
-            string memory gatewayURI = "https://avs.gopluslabs.io/api/v1";
             goPlusProxyAdmin.upgradeAndCall(
                 TransparentUpgradeableProxy(payable(address(goPlusServiceManager))),
                 address(goPlusServiceManagerImplementation),
                 abi.encodeWithSelector(
                     GoPlusServiceManager.initialize.selector,
-                    address(goPlusProxyAdmin),
-                    gatewayAddress,
-                    gatewayURI
-                )
-            );
-
-            // setup AVSMetadataURI
-            goPlusProxyAdmin.upgradeAndCall(
-                TransparentUpgradeableProxy(payable(address(goPlusServiceManager))),
-                address(goPlusServiceManagerImplementation),
-                abi.encodeWithSelector(
-                    IServiceManager.updateAVSMetadataURI.selector,
-                    "https://static2.gopluslabs.io/avs_metadata.json"
+                    address(goPlusCommunityMultisig),
+                    0xfa2B8075362d1c6cd7c48306b68546482dAc72c4 , // gatewayAddress 
+                    "https://avs.gopluslabs.io/api/v1", // gatewayURI
+                    "https://avs.gopluslabs.io/api/v1/metadata" // metadataURI 
                 )
             );
         }
@@ -656,8 +320,7 @@ contract GoPlusDeployer is Script, Utils {
         console.log("StakeRegistry: %s, Impl: %s", address(stakeRegistry), address(stakeRegistryImplementation));
         console.log("OperatorStateRetriever: %s", address(operatorStateRetriever));
         console.log("GoPlusServiceManager owner: %s", goPlusServiceManager.owner());
-        require(address(goPlusProxyAdmin) == goPlusServiceManager.owner(), "The owner of ServiceManager is incorrect.");
-
+        
         // write deployment results to JSON
         string memory parent_object = "addresses";
         vm.serializeAddress(
