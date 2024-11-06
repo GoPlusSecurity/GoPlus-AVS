@@ -1,5 +1,5 @@
 [profile.default]
-src = "eigenlayer-middleware/src"
+src = "goplus-avs"
 out = "out"
 libs = ["eigenlayer-middleware/lib"]
 test = "tests"
