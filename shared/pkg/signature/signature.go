@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"encoding/json"
 	"errors"
+	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"goplus/shared/pkg/types"
@@ -174,4 +175,31 @@ func VerifyOperatorSignatureWithAddress(signedResult *types.SignedOperatorResult
 		return false
 	}
 	return VerifySignatureWithAddress(hashTask.Bytes(), signedResult.SigOperator, address)
+}
+
+func SignBLSOperatorResult(result *types.SignedSecwareResult, blsKeyPair *bls.KeyPair) (*types.SignedOperatorResult, error) {
+	hashTask, err := HashJSON(result)
+	if err != nil {
+		return nil, err
+	}
+	sigOperator := blsKeyPair.SignMessage(hashTask)
+
+	return &types.SignedOperatorResult{
+		Result:      *result,
+		SigOperator: sigOperator.Marshal(),
+	}, nil
+}
+
+func VerifyBLSOperatorSignatureWithBLSPubKey(signedResult *types.SignedOperatorResult, blsPubKey *bls.G2Point) bool {
+	hashTask, err := HashJSON(signedResult.Result)
+	if err != nil {
+		return false
+	}
+
+	sigBLS := bls.Signature{G1Point: new(bls.G1Point).Deserialize(signedResult.SigOperator)}
+	b, err := sigBLS.Verify(blsPubKey, hashTask)
+	if err != nil {
+		return false
+	}
+	return b
 }
