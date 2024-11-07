@@ -80,6 +80,8 @@ func ScanEvents(ethClient *ethclient.Client, fromBlock *big.Int, toBlock *big.In
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
 			return nil, err
+		} else {
+			log.Fatalf("Failed to filterLogs: %v", err)
 		}
 	}
 

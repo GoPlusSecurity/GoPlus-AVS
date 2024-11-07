@@ -22,8 +22,8 @@ Beacon Chain Ether and all ETH-based LSTs supported by EigenLayer are supported 
 💡 **Currently, only `quorum[0]` is available. Other quorums will be opened in the future.**
 
 # Currently active AVS
-1. [GoPlus AVS Mainnet](https://holesky.eigenlayer.xyz/avs/0xa3f64d3102a035db35c42a9001bbc83e08c7a366)
-2. [GoPlus AVS Testnet](https://holesky.eigenlayer.xyz/avs/0xc3c5934686254a59c3b9ce40cfa9f36c1a0beff9)
+1. [GoPlus AVS Mainnet](https://app.eigenlayer.xyz/avs/0xa3f64d3102a035db35c42a9001bbc83e08c7a366)
+2. [GoPlus AVS Testnet](https://holesky.eigenlayer.xyz/avs/0x6e0e0479e177c7f5111682c7025b4412613cd9de)
 
 # Operator setup
 
