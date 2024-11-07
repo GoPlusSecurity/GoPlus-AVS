@@ -38,7 +38,7 @@ type ISignatureUtilsSignatureWithSaltAndExpiry struct {
 
 // GoPlusServiceManagerMetaData contains all meta data concerning the GoPlusServiceManager contract.
 var GoPlusServiceManagerMetaData = &bind.MetaData{
-	ABI: "[{\"type\":\"constructor\",\"inputs\":[{\"name\":\"_avsDirectory\",\"type\":\"address\",\"internalType\":\"contractIAVSDirectory\"},{\"name\":\"_registryCoordinator\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"},{\"name\":\"_stakeRegistry\",\"type\":\"address\",\"internalType\":\"contractIStakeRegistry\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"avsDirectory\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"deregisterOperatorFromAVS\",\"inputs\":[{\"name\":\"operator\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"freezeOperator\",\"inputs\":[{\"name\":\"operatorAddr\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"gatewayAddr\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"gatewayURI\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getOperatorRestakedStrategies\",\"inputs\":[{\"name\":\"operator\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address[]\",\"internalType\":\"address[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getRestakeableStrategies\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address[]\",\"internalType\":\"address[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"initialize\",\"inputs\":[{\"name\":\"initialOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_gatewayAddr\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_gatewayURI\",\"type\":\"string\",\"internalType\":\"string\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"registerOperatorToAVS\",\"inputs\":[{\"name\":\"operator\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"operatorSignature\",\"type\":\"tuple\",\"internalType\":\"structISignatureUtils.SignatureWithSaltAndExpiry\",\"components\":[{\"name\":\"signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"salt\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"expiry\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"updateAVSMetadataURI\",\"inputs\":[{\"name\":\"_metadataURI\",\"type\":\"string\",\"internalType\":\"string\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"updateGatewayAddress\",\"inputs\":[{\"name\":\"_gatewayAddr\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"updateGatewayURI\",\"inputs\":[{\"name\":\"_gatewayURI\",\"type\":\"string\",\"internalType\":\"string\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"uint8\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false}]",
+	ABI: "[{\"type\":\"constructor\",\"inputs\":[{\"name\":\"_avsDirectory\",\"type\":\"address\",\"internalType\":\"contractIAVSDirectory\"},{\"name\":\"_registryCoordinator\",\"type\":\"address\",\"internalType\":\"contractIRegistryCoordinator\"},{\"name\":\"_stakeRegistry\",\"type\":\"address\",\"internalType\":\"contractIStakeRegistry\"}],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"avsDirectory\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"deregisterOperatorFromAVS\",\"inputs\":[{\"name\":\"operator\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"gatewayAddr\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"gatewayURI\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"string\",\"internalType\":\"string\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getOperatorRestakedStrategies\",\"inputs\":[{\"name\":\"operator\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[{\"name\":\"\",\"type\":\"address[]\",\"internalType\":\"address[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"getRestakeableStrategies\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address[]\",\"internalType\":\"address[]\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"initialize\",\"inputs\":[{\"name\":\"initialOwner\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_gatewayAddr\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"_gatewayURI\",\"type\":\"string\",\"internalType\":\"string\"},{\"name\":\"_metadataURI\",\"type\":\"string\",\"internalType\":\"string\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"owner\",\"inputs\":[],\"outputs\":[{\"name\":\"\",\"type\":\"address\",\"internalType\":\"address\"}],\"stateMutability\":\"view\"},{\"type\":\"function\",\"name\":\"registerOperatorToAVS\",\"inputs\":[{\"name\":\"operator\",\"type\":\"address\",\"internalType\":\"address\"},{\"name\":\"operatorSignature\",\"type\":\"tuple\",\"internalType\":\"structISignatureUtils.SignatureWithSaltAndExpiry\",\"components\":[{\"name\":\"signature\",\"type\":\"bytes\",\"internalType\":\"bytes\"},{\"name\":\"salt\",\"type\":\"bytes32\",\"internalType\":\"bytes32\"},{\"name\":\"expiry\",\"type\":\"uint256\",\"internalType\":\"uint256\"}]}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"renounceOwnership\",\"inputs\":[],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"transferOwnership\",\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"updateAVSMetadataURI\",\"inputs\":[{\"name\":\"_metadataURI\",\"type\":\"string\",\"internalType\":\"string\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"updateGatewayAddress\",\"inputs\":[{\"name\":\"_gatewayAddr\",\"type\":\"address\",\"internalType\":\"address\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"function\",\"name\":\"updateGatewayURI\",\"inputs\":[{\"name\":\"_gatewayURI\",\"type\":\"string\",\"internalType\":\"string\"}],\"outputs\":[],\"stateMutability\":\"nonpayable\"},{\"type\":\"event\",\"name\":\"GatewayAddressUpdated\",\"inputs\":[{\"name\":\"oldAddr\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newAddr\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"GatewayURIUpdated\",\"inputs\":[{\"name\":\"oldURI\",\"type\":\"string\",\"indexed\":false,\"internalType\":\"string\"},{\"name\":\"newURI\",\"type\":\"string\",\"indexed\":false,\"internalType\":\"string\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"Initialized\",\"inputs\":[{\"name\":\"version\",\"type\":\"uint8\",\"indexed\":false,\"internalType\":\"uint8\"}],\"anonymous\":false},{\"type\":\"event\",\"name\":\"OwnershipTransferred\",\"inputs\":[{\"name\":\"previousOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"},{\"name\":\"newOwner\",\"type\":\"address\",\"indexed\":true,\"internalType\":\"address\"}],\"anonymous\":false}]",
 }
 
 // GoPlusServiceManagerABI is the input ABI used to generate the binding from.
@@ -394,46 +394,25 @@ func (_GoPlusServiceManager *GoPlusServiceManagerTransactorSession) DeregisterOp
 	return _GoPlusServiceManager.Contract.DeregisterOperatorFromAVS(&_GoPlusServiceManager.TransactOpts, operator)
 }
 
-// FreezeOperator is a paid mutator transaction binding the contract method 0x38c8ee64.
+// Initialize is a paid mutator transaction binding the contract method 0x2016a0d2.
 //
-// Solidity: function freezeOperator(address operatorAddr) returns()
-func (_GoPlusServiceManager *GoPlusServiceManagerTransactor) FreezeOperator(opts *bind.TransactOpts, operatorAddr common.Address) (*types.Transaction, error) {
-	return _GoPlusServiceManager.contract.Transact(opts, "freezeOperator", operatorAddr)
+// Solidity: function initialize(address initialOwner, address _gatewayAddr, string _gatewayURI, string _metadataURI) returns()
+func (_GoPlusServiceManager *GoPlusServiceManagerTransactor) Initialize(opts *bind.TransactOpts, initialOwner common.Address, _gatewayAddr common.Address, _gatewayURI string, _metadataURI string) (*types.Transaction, error) {
+	return _GoPlusServiceManager.contract.Transact(opts, "initialize", initialOwner, _gatewayAddr, _gatewayURI, _metadataURI)
 }
 
-// FreezeOperator is a paid mutator transaction binding the contract method 0x38c8ee64.
+// Initialize is a paid mutator transaction binding the contract method 0x2016a0d2.
 //
-// Solidity: function freezeOperator(address operatorAddr) returns()
-func (_GoPlusServiceManager *GoPlusServiceManagerSession) FreezeOperator(operatorAddr common.Address) (*types.Transaction, error) {
-	return _GoPlusServiceManager.Contract.FreezeOperator(&_GoPlusServiceManager.TransactOpts, operatorAddr)
+// Solidity: function initialize(address initialOwner, address _gatewayAddr, string _gatewayURI, string _metadataURI) returns()
+func (_GoPlusServiceManager *GoPlusServiceManagerSession) Initialize(initialOwner common.Address, _gatewayAddr common.Address, _gatewayURI string, _metadataURI string) (*types.Transaction, error) {
+	return _GoPlusServiceManager.Contract.Initialize(&_GoPlusServiceManager.TransactOpts, initialOwner, _gatewayAddr, _gatewayURI, _metadataURI)
 }
 
-// FreezeOperator is a paid mutator transaction binding the contract method 0x38c8ee64.
+// Initialize is a paid mutator transaction binding the contract method 0x2016a0d2.
 //
-// Solidity: function freezeOperator(address operatorAddr) returns()
-func (_GoPlusServiceManager *GoPlusServiceManagerTransactorSession) FreezeOperator(operatorAddr common.Address) (*types.Transaction, error) {
-	return _GoPlusServiceManager.Contract.FreezeOperator(&_GoPlusServiceManager.TransactOpts, operatorAddr)
-}
-
-// Initialize is a paid mutator transaction binding the contract method 0x4571e3a6.
-//
-// Solidity: function initialize(address initialOwner, address _gatewayAddr, string _gatewayURI) returns()
-func (_GoPlusServiceManager *GoPlusServiceManagerTransactor) Initialize(opts *bind.TransactOpts, initialOwner common.Address, _gatewayAddr common.Address, _gatewayURI string) (*types.Transaction, error) {
-	return _GoPlusServiceManager.contract.Transact(opts, "initialize", initialOwner, _gatewayAddr, _gatewayURI)
-}
-
-// Initialize is a paid mutator transaction binding the contract method 0x4571e3a6.
-//
-// Solidity: function initialize(address initialOwner, address _gatewayAddr, string _gatewayURI) returns()
-func (_GoPlusServiceManager *GoPlusServiceManagerSession) Initialize(initialOwner common.Address, _gatewayAddr common.Address, _gatewayURI string) (*types.Transaction, error) {
-	return _GoPlusServiceManager.Contract.Initialize(&_GoPlusServiceManager.TransactOpts, initialOwner, _gatewayAddr, _gatewayURI)
-}
-
-// Initialize is a paid mutator transaction binding the contract method 0x4571e3a6.
-//
-// Solidity: function initialize(address initialOwner, address _gatewayAddr, string _gatewayURI) returns()
-func (_GoPlusServiceManager *GoPlusServiceManagerTransactorSession) Initialize(initialOwner common.Address, _gatewayAddr common.Address, _gatewayURI string) (*types.Transaction, error) {
-	return _GoPlusServiceManager.Contract.Initialize(&_GoPlusServiceManager.TransactOpts, initialOwner, _gatewayAddr, _gatewayURI)
+// Solidity: function initialize(address initialOwner, address _gatewayAddr, string _gatewayURI, string _metadataURI) returns()
+func (_GoPlusServiceManager *GoPlusServiceManagerTransactorSession) Initialize(initialOwner common.Address, _gatewayAddr common.Address, _gatewayURI string, _metadataURI string) (*types.Transaction, error) {
+	return _GoPlusServiceManager.Contract.Initialize(&_GoPlusServiceManager.TransactOpts, initialOwner, _gatewayAddr, _gatewayURI, _metadataURI)
 }
 
 // RegisterOperatorToAVS is a paid mutator transaction binding the contract method 0x9926ee7d.
@@ -560,6 +539,294 @@ func (_GoPlusServiceManager *GoPlusServiceManagerSession) UpdateGatewayURI(_gate
 // Solidity: function updateGatewayURI(string _gatewayURI) returns()
 func (_GoPlusServiceManager *GoPlusServiceManagerTransactorSession) UpdateGatewayURI(_gatewayURI string) (*types.Transaction, error) {
 	return _GoPlusServiceManager.Contract.UpdateGatewayURI(&_GoPlusServiceManager.TransactOpts, _gatewayURI)
+}
+
+// GoPlusServiceManagerGatewayAddressUpdatedIterator is returned from FilterGatewayAddressUpdated and is used to iterate over the raw logs and unpacked data for GatewayAddressUpdated events raised by the GoPlusServiceManager contract.
+type GoPlusServiceManagerGatewayAddressUpdatedIterator struct {
+	Event *GoPlusServiceManagerGatewayAddressUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *GoPlusServiceManagerGatewayAddressUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(GoPlusServiceManagerGatewayAddressUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(GoPlusServiceManagerGatewayAddressUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *GoPlusServiceManagerGatewayAddressUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *GoPlusServiceManagerGatewayAddressUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// GoPlusServiceManagerGatewayAddressUpdated represents a GatewayAddressUpdated event raised by the GoPlusServiceManager contract.
+type GoPlusServiceManagerGatewayAddressUpdated struct {
+	OldAddr common.Address
+	NewAddr common.Address
+	Raw     types.Log // Blockchain specific contextual infos
+}
+
+// FilterGatewayAddressUpdated is a free log retrieval operation binding the contract event 0xd4c520edf96d8835d69a539bded1b9d2b881f5e78ee3a66bb1d13e12013b5241.
+//
+// Solidity: event GatewayAddressUpdated(address indexed oldAddr, address indexed newAddr)
+func (_GoPlusServiceManager *GoPlusServiceManagerFilterer) FilterGatewayAddressUpdated(opts *bind.FilterOpts, oldAddr []common.Address, newAddr []common.Address) (*GoPlusServiceManagerGatewayAddressUpdatedIterator, error) {
+
+	var oldAddrRule []interface{}
+	for _, oldAddrItem := range oldAddr {
+		oldAddrRule = append(oldAddrRule, oldAddrItem)
+	}
+	var newAddrRule []interface{}
+	for _, newAddrItem := range newAddr {
+		newAddrRule = append(newAddrRule, newAddrItem)
+	}
+
+	logs, sub, err := _GoPlusServiceManager.contract.FilterLogs(opts, "GatewayAddressUpdated", oldAddrRule, newAddrRule)
+	if err != nil {
+		return nil, err
+	}
+	return &GoPlusServiceManagerGatewayAddressUpdatedIterator{contract: _GoPlusServiceManager.contract, event: "GatewayAddressUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchGatewayAddressUpdated is a free log subscription operation binding the contract event 0xd4c520edf96d8835d69a539bded1b9d2b881f5e78ee3a66bb1d13e12013b5241.
+//
+// Solidity: event GatewayAddressUpdated(address indexed oldAddr, address indexed newAddr)
+func (_GoPlusServiceManager *GoPlusServiceManagerFilterer) WatchGatewayAddressUpdated(opts *bind.WatchOpts, sink chan<- *GoPlusServiceManagerGatewayAddressUpdated, oldAddr []common.Address, newAddr []common.Address) (event.Subscription, error) {
+
+	var oldAddrRule []interface{}
+	for _, oldAddrItem := range oldAddr {
+		oldAddrRule = append(oldAddrRule, oldAddrItem)
+	}
+	var newAddrRule []interface{}
+	for _, newAddrItem := range newAddr {
+		newAddrRule = append(newAddrRule, newAddrItem)
+	}
+
+	logs, sub, err := _GoPlusServiceManager.contract.WatchLogs(opts, "GatewayAddressUpdated", oldAddrRule, newAddrRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(GoPlusServiceManagerGatewayAddressUpdated)
+				if err := _GoPlusServiceManager.contract.UnpackLog(event, "GatewayAddressUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseGatewayAddressUpdated is a log parse operation binding the contract event 0xd4c520edf96d8835d69a539bded1b9d2b881f5e78ee3a66bb1d13e12013b5241.
+//
+// Solidity: event GatewayAddressUpdated(address indexed oldAddr, address indexed newAddr)
+func (_GoPlusServiceManager *GoPlusServiceManagerFilterer) ParseGatewayAddressUpdated(log types.Log) (*GoPlusServiceManagerGatewayAddressUpdated, error) {
+	event := new(GoPlusServiceManagerGatewayAddressUpdated)
+	if err := _GoPlusServiceManager.contract.UnpackLog(event, "GatewayAddressUpdated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// GoPlusServiceManagerGatewayURIUpdatedIterator is returned from FilterGatewayURIUpdated and is used to iterate over the raw logs and unpacked data for GatewayURIUpdated events raised by the GoPlusServiceManager contract.
+type GoPlusServiceManagerGatewayURIUpdatedIterator struct {
+	Event *GoPlusServiceManagerGatewayURIUpdated // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *GoPlusServiceManagerGatewayURIUpdatedIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(GoPlusServiceManagerGatewayURIUpdated)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(GoPlusServiceManagerGatewayURIUpdated)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *GoPlusServiceManagerGatewayURIUpdatedIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *GoPlusServiceManagerGatewayURIUpdatedIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// GoPlusServiceManagerGatewayURIUpdated represents a GatewayURIUpdated event raised by the GoPlusServiceManager contract.
+type GoPlusServiceManagerGatewayURIUpdated struct {
+	OldURI string
+	NewURI string
+	Raw    types.Log // Blockchain specific contextual infos
+}
+
+// FilterGatewayURIUpdated is a free log retrieval operation binding the contract event 0xe901d1036a5f8141a1503434545c3c097f1d7e26e1e9e74e7e43e98f1d75e892.
+//
+// Solidity: event GatewayURIUpdated(string oldURI, string newURI)
+func (_GoPlusServiceManager *GoPlusServiceManagerFilterer) FilterGatewayURIUpdated(opts *bind.FilterOpts) (*GoPlusServiceManagerGatewayURIUpdatedIterator, error) {
+
+	logs, sub, err := _GoPlusServiceManager.contract.FilterLogs(opts, "GatewayURIUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return &GoPlusServiceManagerGatewayURIUpdatedIterator{contract: _GoPlusServiceManager.contract, event: "GatewayURIUpdated", logs: logs, sub: sub}, nil
+}
+
+// WatchGatewayURIUpdated is a free log subscription operation binding the contract event 0xe901d1036a5f8141a1503434545c3c097f1d7e26e1e9e74e7e43e98f1d75e892.
+//
+// Solidity: event GatewayURIUpdated(string oldURI, string newURI)
+func (_GoPlusServiceManager *GoPlusServiceManagerFilterer) WatchGatewayURIUpdated(opts *bind.WatchOpts, sink chan<- *GoPlusServiceManagerGatewayURIUpdated) (event.Subscription, error) {
+
+	logs, sub, err := _GoPlusServiceManager.contract.WatchLogs(opts, "GatewayURIUpdated")
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(GoPlusServiceManagerGatewayURIUpdated)
+				if err := _GoPlusServiceManager.contract.UnpackLog(event, "GatewayURIUpdated", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseGatewayURIUpdated is a log parse operation binding the contract event 0xe901d1036a5f8141a1503434545c3c097f1d7e26e1e9e74e7e43e98f1d75e892.
+//
+// Solidity: event GatewayURIUpdated(string oldURI, string newURI)
+func (_GoPlusServiceManager *GoPlusServiceManagerFilterer) ParseGatewayURIUpdated(log types.Log) (*GoPlusServiceManagerGatewayURIUpdated, error) {
+	event := new(GoPlusServiceManagerGatewayURIUpdated)
+	if err := _GoPlusServiceManager.contract.UnpackLog(event, "GatewayURIUpdated", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
 }
 
 // GoPlusServiceManagerInitializedIterator is returned from FilterInitialized and is used to iterate over the raw logs and unpacked data for Initialized events raised by the GoPlusServiceManager contract.
