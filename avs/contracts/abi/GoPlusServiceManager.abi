@@ -48,19 +48,6 @@
   },
   {
     "type": "function",
-    "name": "freezeOperator",
-    "inputs": [
-      {
-        "name": "operatorAddr",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "gatewayAddr",
     "inputs": [],
     "outputs": [
@@ -133,6 +120,11 @@
       },
       {
         "name": "_gatewayURI",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "_metadataURI",
         "type": "string",
         "internalType": "string"
       }
@@ -246,6 +238,44 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "GatewayAddressUpdated",
+    "inputs": [
+      {
+        "name": "oldAddr",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newAddr",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "GatewayURIUpdated",
+    "inputs": [
+      {
+        "name": "oldURI",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      },
+      {
+        "name": "newURI",
+        "type": "string",
+        "indexed": false,
+        "internalType": "string"
+      }
+    ],
+    "anonymous": false
   },
   {
     "type": "event",
