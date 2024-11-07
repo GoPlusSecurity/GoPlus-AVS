@@ -5,7 +5,7 @@ This guide contains the steps needed to set up and register your node for GoPlus
 # Minimal system requirements
 - 4 CPU
 - 8GB Memory
-- 20GB SSD
+- 20GB Hard disk (Amazon EBS st1)
 - Ubuntu 22.04 LTS
 - Docker v24 and above
 - [Docker compose](https://docs.docker.com/compose/install)
@@ -135,7 +135,7 @@ API_PORT=7776
 OPERATOR_URL=http://your_operator_ip:7776
 ETH_RPC=https://eth-holesky.g.alchemy.com/v2/<apikey>
 QUORUM_NUMS=0
-REGISTRY_COORDINATOR_ADDR=0x3C503C651e3BD82C7AD169411E674d8ea6ad07e6
+REGISTRY_COORDINATOR_ADDR=0x61AA80e5891DbfCebD0B78a704F3de996E449FdE
 OPERATOR_STATE_RETRIEVER=0x5ce26317F7edCBCBD1a569629af5DC41c1622045
 ```
 
