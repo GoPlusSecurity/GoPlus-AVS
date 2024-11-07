@@ -1,0 +1,22 @@
+{
+  "Ejector": "0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939",
+  "blsApkRegistry": "0x3a57A455758b1f53D9f36a7B14E263B3DA081bf6",
+  "blsApkRegistryImplementation": "0x759f3bdAbDAC9fDd8C2b252cB8B3624EaB37747c",
+  "churnApprover": "0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939",
+  "deployer": "0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939",
+  "goPlusCommunityMultisig": "0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939",
+  "goPlusPauser": "0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939",
+  "goPlusPauserRegistry": "0xFCE5c45b496F944588Ea6fF5a7E67cA0292010C2",
+  "goPlusProxyAdmin": "0x84db75e0565dF040AC426C555A041b787B5559E3",
+  "goPlusProxyAdminOwner": "0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939",
+  "goPlusServiceManager": "0x6E0e0479e177c7F5111682C7025b4412613cd9dE",
+  "goPlusServiceManagerImplementation": "0x59D942eFd3B4038EFCD9C8B95d6174213a849697",
+  "goPlusServiceManagerOwner": "0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939",
+  "indexRegistry": "0x54909D6b0518F93da140DeE19c74F7e4e46f1e31",
+  "indexRegistryImplementation": "0xA94F3BD1AfC9c1F9CB16b860fb2BA341E2D4b258",
+  "operatorStateRetriever": "0x5ce26317F7edCBCBD1a569629af5DC41c1622045",
+  "registryCoordinator": "0x61AA80e5891DbfCebD0B78a704F3de996E449FdE",
+  "registryCoordinatorImplementation": "0x024943FaEa481b91e6e3D348C620360a365C9071",
+  "stakeRegistry": "0xCB20b2b4e69FD545f40b7676F7d6f069a0Ad9d24",
+  "stakeRegistryImplementation": "0xaA3e077882f0aECF00174DcfecFCC3755A58B9E1"
+}
