@@ -1,5 +1,5 @@
 copy-config:
-	cp ./.envexample ./.env
+	cp ./.env.example ./.env
 
 ENV_FILE_RELATIVE_PATH = ./.env
 ENV_FILE = $(shell echo "$(shell pwd)/$(ENV_FILE_RELATIVE_PATH)")
