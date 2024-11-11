@@ -6,8 +6,11 @@ copy-config:
 ENV_FILE_RELATIVE_PATH = ./.env
 ENV_FILE = $(shell echo "$(shell pwd)/$(ENV_FILE_RELATIVE_PATH)")
 
-build-avs-docker:
-	docker build -t goplus_avs:latest -f ./Dockerfile .
+build-avs-docker-mainnet:
+	docker build --build-arg DOCKER_USER=goplusavs --build-arg DOCKER_PWD=dckr_pat_wRhsTj4U7REe7IFnrgFkAOswjaM -t goplus_avs:latest -f ./Dockerfile .
+
+build-avs-docker-testnet:
+	docker build --build-arg DOCKER_USER=joker1034 --build-arg DOCKER_PWD=dckr_pat_MH5qjNWvS3iahu8--rK4wW7NbEM -t goplus_avs:latest -f ./Dockerfile .
 
 build-avs:
 	cd ./avs && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o ./avs goplus/avs/cmd & cd ..
