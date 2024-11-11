@@ -193,5 +193,5 @@ Ejector: 0x15fbbC47a244aE2A38071A106dCfcF3D57C9D939
 
 `ServiceManager` and `ECDSAStakeRegistry` are TUP contracts; the former handles the creation and response of Tasks and interacts with EigenLayer. The latter provides the joining and exiting of Operators.
 
-Both of these TUP contracts have `ProxyAdmin` as the owner, and the owner of `ProxyAdmin` is the `deployer`."
+Both of these TUP contracts have `ProxyAdmin` as the owner, and the owner of `ProxyAdmin` is the `deployer`.
                     

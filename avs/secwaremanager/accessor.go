@@ -3,9 +3,9 @@ package secwaremanager
 
 import (
 	"bytes"
-	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
+	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	"github.com/avast/retry-go/v4"
 	"github.com/ethereum/go-ethereum/common"
 	"goplus/avs/config"
@@ -167,14 +167,14 @@ type GatewayAccessorInterface interface {
 
 type GatewayAccessorImpl struct {
 	AddressOperator common.Address
-	SkOperator      *ecdsa.PrivateKey
+	BLSKeypair      *bls.KeyPair
 	GatewayUrl      string
 }
 
 func NewGatewayAccessorImpl(cfg config.Config) (*GatewayAccessorImpl, error) {
 	return &GatewayAccessorImpl{
 		AddressOperator: cfg.AddressOperator,
-		SkOperator:      cfg.SkOperator,
+		BLSKeypair:      cfg.BLSKeypair,
 		GatewayUrl:      cfg.GatewayUrl,
 	}, nil
 }
@@ -201,7 +201,7 @@ func (g *GatewayAccessorImpl) GetSecwareConfig() ([]SecwareConfig, error) {
 		Operator: g.AddressOperator[:],
 	}
 
-	signedSc, err := signSecwareConfigRequest(&sc, g.SkOperator)
+	signedSc, err := signSecwareConfigRequest(&sc, g.BLSKeypair)
 	if err != nil {
 		return nil, err
 	}
@@ -256,20 +256,17 @@ func (g *GatewayAccessorImpl) GetSecwareConfig() ([]SecwareConfig, error) {
 	return result, nil
 }
 
-func signSecwareConfigRequest(req *secwareConfigRequest, sk *ecdsa.PrivateKey) (*signedSecwareConfigRequest, error) {
+func signSecwareConfigRequest(req *secwareConfigRequest, blsKeyPair *bls.KeyPair) (*signedSecwareConfigRequest, error) {
 	hashReq, err := signature.HashJSON(req)
 	if err != nil {
 		return nil, err
 	}
 
-	sigReq, err := signature.SignHash(hashReq, sk)
-	if err != nil {
-		return nil, err
-	}
+	sigReq := blsKeyPair.SignMessage(hashReq)
 
 	return &signedSecwareConfigRequest{
 		Args:        *req,
-		SigOperator: sigReq,
+		SigOperator: sigReq.Marshal(),
 	}, nil
 }
 
@@ -291,7 +288,7 @@ func (g *GatewayAccessorImpl) ReportHealth(health []SecwareHealthResult) error {
 		Secware:  health,
 	}
 
-	srh, err := signReportHealthRequest(&rh, g.SkOperator)
+	srh, err := signReportHealthRequest(&rh, g.BLSKeypair)
 	if err != nil {
 		return err
 	}
@@ -331,19 +328,15 @@ func (g *GatewayAccessorImpl) ReportHealth(health []SecwareHealthResult) error {
 
 }
 
-func signReportHealthRequest(req *ReportHealthRequest, sk *ecdsa.PrivateKey) (*SignedReportHealthRequest, error) {
+func signReportHealthRequest(req *ReportHealthRequest, blsKeyPair *bls.KeyPair) (*SignedReportHealthRequest, error) {
 	hashReq, err := signature.HashJSON(req)
 	if err != nil {
 		return nil, err
 	}
 
-	sigReq, err := signature.SignHash(hashReq, sk)
-	if err != nil {
-		return nil, err
-	}
-
+	sigReq := blsKeyPair.SignMessage(hashReq)
 	return &SignedReportHealthRequest{
 		Heartbeat:   *req,
-		SigOperator: sigReq,
+		SigOperator: sigReq.Marshal(),
 	}, nil
 }

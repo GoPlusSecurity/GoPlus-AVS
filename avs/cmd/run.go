@@ -3,12 +3,14 @@ package main
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"crypto/rand"
 	"encoding/json"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/avsregistry"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/wallet"
 	"github.com/Layr-Labs/eigensdk-go/chainio/txmgr"
 	regcoord "github.com/Layr-Labs/eigensdk-go/contracts/bindings/RegistryCoordinator"
+	sdkecdsa "github.com/Layr-Labs/eigensdk-go/crypto/ecdsa"
 	"github.com/Layr-Labs/eigensdk-go/signerv2"
 	eigenSdkTypes "github.com/Layr-Labs/eigensdk-go/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -30,13 +32,34 @@ import (
 	"time"
 )
 
+func getOperatorECDSAKey() (*ecdsa.PrivateKey, error) {
+	ecdsaKeyStorePath, _ := config.GetOperatorECDSAKeyStorePath()
+	if ecdsaKeyStorePath == "" {
+		log.Fatal("Operator ECDSA Key Store Path not provided")
+	}
+	ecdsaKeyPassword, _ := config.GetOperatorECDSAKeyPassword()
+
+	skOperator, err := sdkecdsa.ReadKey(ecdsaKeyStorePath, ecdsaKeyPassword)
+	if err != nil {
+		log.Fatalf("Failed to read operator ECDSA key: %v", err)
+		return nil, err
+	}
+	return skOperator, nil
+}
+
 func registerWithAVS(cliCtx *cli.Context) error {
 	cfg, err := config.NewConfig(cliCtx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	opAddr, err := signature.GetAddressFromPrivateKey(cfg.SkOperator)
+	skOperator, err := getOperatorECDSAKey()
+	if err != nil {
+		cfg.Logger.Fatalf("Failed to read operator ECDSA key: %v", err)
+		return err
+	}
+
+	opAddr, err := signature.GetAddressFromPrivateKey(skOperator)
 	if err != nil {
 		cfg.Logger.Fatal("Failed to calculate operator address.")
 		return err
@@ -49,7 +72,7 @@ func registerWithAVS(cliCtx *cli.Context) error {
 	}
 
 	signerV2 := func(ctx context.Context, address common.Address) (bind.SignerFn, error) {
-		return signerv2.PrivateKeySignerFn(cfg.SkOperator, chainId)
+		return signerv2.PrivateKeySignerFn(skOperator, chainId)
 	}
 
 	skWallet, err := wallet.NewPrivateKeyWallet(cfg.EthHttpClient, signerV2, opAddr, cfg.Logger)
@@ -108,7 +131,7 @@ func registerWithAVS(cliCtx *cli.Context) error {
 
 	_, err = avsRegistryWriter.RegisterOperatorInQuorumWithAVSRegistryCoordinator(
 		context.Background(),
-		cfg.SkOperator,
+		skOperator,
 		operatorToAvsRegistrationSigSalt,
 		operatorToAvsRegistrationSigExpiry,
 		cfg.BLSKeypair,
@@ -130,7 +153,13 @@ func deregisterWithAVS(cliCtx *cli.Context) error {
 		log.Fatal(err)
 	}
 
-	opAddr, err := signature.GetAddressFromPrivateKey(cfg.SkOperator)
+	skOperator, err := getOperatorECDSAKey()
+	if err != nil {
+		cfg.Logger.Fatalf("Failed to read operator ECDSA key: %v", err)
+		return err
+	}
+
+	opAddr, err := signature.GetAddressFromPrivateKey(skOperator)
 	if err != nil {
 		cfg.Logger.Fatal("Failed to calculate operator address.")
 		return err
@@ -142,7 +171,7 @@ func deregisterWithAVS(cliCtx *cli.Context) error {
 	}
 
 	signerV2 := func(ctx context.Context, address common.Address) (bind.SignerFn, error) {
-		return signerv2.PrivateKeySignerFn(cfg.SkOperator, chainId)
+		return signerv2.PrivateKeySignerFn(skOperator, chainId)
 	}
 
 	skWallet, err := wallet.NewPrivateKeyWallet(cfg.EthHttpClient, signerV2, opAddr, cfg.Logger)
@@ -193,19 +222,16 @@ func start(cliCtx *cli.Context) error {
 		log.Fatal(err)
 	}
 
-	// TODO 确认所需的metric
 	mt, err := metrics.NewAvsMetrics(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// TODO 确认DB内容
 	st, err := state.NewAvsDbState(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// 启动 secware 容器的管理器
 	manager, err := secwaremanager.NewSecwareManager(cfg, mt)
 	if err != nil {
 		log.Fatal(err)
@@ -216,7 +242,6 @@ func start(cliCtx *cli.Context) error {
 		log.Fatal(err)
 	}
 
-	// 启动 AVS 主HTTP服务
 	svr, err := server.New(cfg, mt, manager, st)
 	if err != nil {
 		log.Fatal(err)

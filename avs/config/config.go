@@ -1,30 +1,28 @@
 package config
 
 import (
-	"crypto/ecdsa"
 	"fmt"
 	"github.com/Layr-Labs/eigensdk-go/chainio/clients/eth"
 	"github.com/Layr-Labs/eigensdk-go/crypto/bls"
 	sdklogging "github.com/Layr-Labs/eigensdk-go/logging"
-	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 	"goplus/avs/chainio"
-	"goplus/shared/pkg/types"
+	"os"
 	"path/filepath"
 	"strings"
 )
 
 var (
-	ConfigFileFlag = "config-file"
+	ConfigFileFlag        = "config-file"
+	EcdsaKeyStorePathFlag = "ecdsa-key-store-path"
 )
 
 type RawConfig struct {
 	ComposeFilePath            string `mapstructure:"COMPOSE_FILE_PATH"`
-	OperatorSecretKey          string `mapstructure:"OPERATOR_SECRET_KEY"`
-	OperatorBLSSecretKey       string `mapstructure:"OPERATOR_BLS_SECRET_KEY"`
+	AddressOperator            string `mapstructure:"OPERATOR_ADDRESS"`
+	BLSKeyStorePath            string `mapstructure:"BLS_KEY_STORE_PATH"`
 	APIPort                    int    `mapstructure:"API_PORT"`
 	OperatorURL                string `mapstructure:"OPERATOR_URL"`
 	NodeClass                  string `mapstructure:"NODE_CLASS"`
@@ -38,11 +36,11 @@ func (r *RawConfig) isValid() error {
 	if r.ComposeFilePath == "" {
 		return fmt.Errorf("compose file path is required")
 	}
-	if r.OperatorSecretKey == "" {
-		return fmt.Errorf("operator secret key is required")
+	if r.AddressOperator == "" {
+		return fmt.Errorf("operator address is required")
 	}
-	if r.OperatorBLSSecretKey == "" {
-		return fmt.Errorf("operator bls secret key is required")
+	if r.BLSKeyStorePath == "" {
+		return fmt.Errorf("operator bls key store path is required")
 	}
 	if r.APIPort == 0 {
 		return fmt.Errorf("api port is required")
@@ -82,14 +80,12 @@ type Config struct {
 	RegCoordinatorAddr         common.Address
 	OperatorStateRetrieverAddr common.Address
 
-	ETHRpc            string
-	EthHttpClient     eth.Client
-	PromMetricsIpPort string
+	ETHRpc        string
+	EthHttpClient eth.Client
 
 	BLSKeypair      *bls.KeyPair
 	AddressGateway  common.Address
 	AddressOperator common.Address
-	SkOperator      *ecdsa.PrivateKey
 
 	NodeClass   string
 	OperatorURL string
@@ -123,11 +119,11 @@ func getRawConfigFromEnv() (RawConfig, error) {
 	if err != nil {
 		return RawConfig{}, err
 	}
-	err = viper.BindEnv("OPERATOR_SECRET_KEY")
+	err = viper.BindEnv("OPERATOR_ADDRESS")
 	if err != nil {
 		return RawConfig{}, err
 	}
-	err = viper.BindEnv("OPERATOR_BLS_SECRET_KEY")
+	err = viper.BindEnv("BLS_KEY_STORE_PATH")
 	if err != nil {
 		return RawConfig{}, err
 	}
@@ -199,6 +195,15 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		return Config{}, err
 	}
 
+	blsKeyPassword, ok := GetOperatorBLSKeyPassword()
+	if !ok {
+		logger.Infof("BLS key password not set. using empty string")
+	}
+	blsKeyPair, err := bls.ReadPrivateKeyFromFile(rawConfig.BLSKeyStorePath, blsKeyPassword)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to read bls key pair: %w", err)
+	}
+
 	regCoordinatorAddr := common.HexToAddress(rawConfig.RegCoordinatorAddr)
 	avsReader, err := chainio.NewAvsReader(regCoordinatorAddr, ethRpcClient)
 	if err != nil {
@@ -213,34 +218,13 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 	logger.Infof("Gateway address: %s", gatewayAddr.Hex())
 	logger.Infof("Gateway url: %s", gatewayUrl)
 
-	skOperatorString := rawConfig.OperatorSecretKey
-	skOperatorString = strings.TrimPrefix(skOperatorString, "0x")
-	if skOperatorString == "" {
-		return Config{}, fmt.Errorf("operator secret key is required")
-	}
-
-	skOperator, err := crypto.HexToECDSA(skOperatorString)
-	if err != nil {
-		return Config{}, err
-	}
-
-	addressOperator := crypto.PubkeyToAddress(skOperator.PublicKey)
+	addressOperator := common.HexToAddress(rawConfig.AddressOperator)
 	addressOperatorString := addressOperator.Hex()
 	logger.Infof("Operator address: %s", addressOperatorString)
 
 	if !filepath.IsAbs(rawConfig.ComposeFilePath) {
 		return Config{}, fmt.Errorf("compose file path must be absolute")
 	}
-
-	skBLSString := rawConfig.OperatorBLSSecretKey
-	if skBLSString == "" {
-		return Config{}, fmt.Errorf("operator bls secret key is required")
-	}
-	skBLS, err := types.NewHexBytesFromString(skBLSString)
-	if err != nil {
-		return Config{}, fmt.Errorf("cannot parse operator's BLS private key")
-	}
-	blsKeyPair := bls.NewKeyPair(new(fr.Element).SetBytes(skBLS))
 
 	return Config{
 		Logger:          logger,
@@ -255,7 +239,6 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 		GatewayUrl:      gatewayUrl,
 		AddressGateway:  gatewayAddr,
 		AddressOperator: addressOperator,
-		SkOperator:      skOperator,
 		BLSKeypair:      blsKeyPair,
 
 		NodeClass:   rawConfig.NodeClass,
@@ -264,4 +247,16 @@ func NewConfig(ctx *cli.Context) (Config, error) {
 
 		QuorumNums: rawConfig.QuorumNums,
 	}, nil
+}
+
+func GetOperatorBLSKeyPassword() (string, bool) {
+	return os.LookupEnv("BLS_KEY_PASSWORD")
+}
+
+func GetOperatorECDSAKeyStorePath() (string, bool) {
+	return os.LookupEnv("ECDSA_KEY_STORE_PATH")
+}
+
+func GetOperatorECDSAKeyPassword() (string, bool) {
+	return os.LookupEnv("ECDSA_KEY_PASSWORD")
 }

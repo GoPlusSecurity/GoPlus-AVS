@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 copy-config:
 	cp ./.env.example ./.env
 
@@ -12,20 +14,31 @@ build-avs:
 
 run-avs:
 	@echo "Using env file: $(ENV_FILE)"
-	sudo bash -c './avs/avs start -c $(ENV_FILE)'
+	@echo "Starting AVS..."
+	@bash -c 'BLS_KEY_PASSWORD=$(BLS_KEY_PASSWORD) ./avs/avs start -c $(ENV_FILE)'
 
 reg-with-avs:
 	@echo "Using env file: $(ENV_FILE)"
-	sudo bash -c './avs/avs register-with-avs -c $(ENV_FILE)'
+	@bash -c ' \
+		read -p "Enter ECDSA key store path: " ECDSA_KEY_STORE_PATH; \
+		read -sp "Enter ECDSA key store password: " ECDSA_PASSWORD; \
+		echo ""; \
+		echo "Starting registration process..."; \
+		ECDSA_KEY_STORE_PATH=$$ECDSA_KEY_STORE_PATH ECDSA_KEY_PASSWORD=$$ECDSA_PASSWORD BLS_KEY_PASSWORD=$$BLS_KEY_PASSWORD ./avs/avs register-with-avs -c $(ENV_FILE)'
 
 dereg-with-avs:
 	@echo "Using env file: $(ENV_FILE)"
-	sudo bash -c './avs/avs deregister-with-avs -c $(ENV_FILE)'
+	@bash -c ' \
+		read -p "Enter ECDSA key store path: " ECDSA_KEY_STORE_PATH; \
+		read -sp "Enter ECDSA key store password: " ECDSA_PASSWORD; \
+		echo ""; \
+		echo "Starting deregistration process..."; \
+		ECDSA_KEY_STORE_PATH=$$ECDSA_KEY_STORE_PATH ECDSA_KEY_PASSWORD=$$ECDSA_PASSWORD ./avs/avs deregister-with-avs -c $(ENV_FILE)'
 
 run-avs-docker:
-	@echo "Using env file: $(ENV_FILE)"
+	@echo "Using env file: $(ENV_FILE) ";
 	export API_PORT=$(shell grep API_PORT $(ENV_FILE) | cut -d '=' -f 2) && envsubst < ./prometheus-template.yml > ./prometheus.yml
-	sudo bash -c 'CONFIG_FILE_PATH=$(ENV_FILE) docker compose -f ./docker-compose.yml --env-file=$(ENV_FILE) up -d'
+	@sudo bash -c 'CONFIG_FILE_PATH=$(ENV_FILE) BLS_KEY_PASSWORD=$(BLS_KEY_PASSWORD) docker compose -f ./docker-compose.yml --env-file=$(ENV_FILE) up -d'
 
 stop-avs-in-docker:
 	 sudo docker compose -f ./docker-compose.yml down

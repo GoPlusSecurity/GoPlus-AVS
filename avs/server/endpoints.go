@@ -57,7 +57,7 @@ func (a *Server) handleTask(c *gin.Context) {
 		a.metricsIntf.IncTaskFailed()
 		return
 	}
-	signResult, err := signature.SignOperatorResult(result, a.config.SkOperator)
+	signResult, err := signature.SignBLSOperatorResult(&result, a.config.BLSKeypair)
 	if err != nil {
 		c.JSON(400, NewErrorOperatorResponse(400, err.Error()))
 		a.metricsIntf.IncTaskFailed()
