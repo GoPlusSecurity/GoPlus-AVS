@@ -20,7 +20,10 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o /app/avs/avs goplus/avs
 
 FROM docker:latest
 
-RUN docker login -u goplusavs -p dckr_pat_wRhsTj4U7REe7IFnrgFkAOswjaM
+ARG DOCKER_USER
+ARG DOCKER_PWD
+
+RUN docker login -u $DOCKER_USER -p $DOCKER_PWD
 
 COPY --from=builder /app/avs/avs /app/avs
 RUN chmod +x /app/avs
