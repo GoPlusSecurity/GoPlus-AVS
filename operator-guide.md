@@ -162,12 +162,16 @@ If you no longer want to run the AVS, you can opt out by running `make dereg-wit
 
 1. Start with Docker Compose:
     1. Run `export BLS_KEY_PASSWORD=...` to export the password to BLS keystore file.
-    2. Run `make build-avs-docker` to build the image.
-    3. Run `sudo make run-avs-docker` to start. This also starts Prometheus and Grafana. All components use the **Host** network mode, so make sure the API_PORT, 9090, and 3000 ports in the configuration are not in use.
+    2. Build the AVS Docker image:
+        1. For Testnet, run `make build-avs-docker-testnet`.
+        2. For Mainnet, run `make build-avs-docker-mainnet`.
+    3. Run `make run-avs-docker` to start. This also starts Prometheus and Grafana. All components use the **Host** network mode, so make sure the API_PORT, 9090, and 3000 ports in the configuration are not in use.
 
 2. Start as a standalone process:
     1. Run `export BLS_KEY_PASSWORD=...` to export the password to BLS keystore file.
-    2. Run `sudo docker login -u goplusavs -p dckr_pat_wRhsTj4U7REe7IFnrgFkAOswjaM` to log in.
+    2. Login to Docker:
+       1. For Testnet, Run `sudo docker login -u joker1034 -p dckr_pat_MH5qjNWvS3iahu8--rK4wW7NbEM` to log in.
+       2. For Mainnet, Run `sudo docker login -u goplusavs -p dckr_pat_wRhsTj4U7REe7IFnrgFkAOswjaM` to log in.
     3. Run `make run-avs` to start.
 
 
