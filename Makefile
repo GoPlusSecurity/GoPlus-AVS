@@ -14,7 +14,8 @@ build-avs:
 
 run-avs:
 	@echo "Using env file: $(ENV_FILE)"
-	bash -c './avs/avs start -c $(ENV_FILE)'
+	@echo "Starting AVS..."
+	@bash -c 'BLS_KEY_PASSWORD=$(BLS_KEY_PASSWORD) ./avs/avs start -c $(ENV_FILE)'
 
 reg-with-avs:
 	@echo "Using env file: $(ENV_FILE)"
@@ -37,7 +38,7 @@ dereg-with-avs:
 run-avs-docker:
 	@echo "Using env file: $(ENV_FILE) ";
 	export API_PORT=$(shell grep API_PORT $(ENV_FILE) | cut -d '=' -f 2) && envsubst < ./prometheus-template.yml > ./prometheus.yml
-	sudo bash -c 'CONFIG_FILE_PATH=$(ENV_FILE) BLS_KEY_PASSWORD=$(BLS_KEY_PASSWORD) docker compose -f ./docker-compose.yml --env-file=$(ENV_FILE) up -d'
+	@sudo bash -c 'CONFIG_FILE_PATH=$(ENV_FILE) BLS_KEY_PASSWORD=$(BLS_KEY_PASSWORD) docker compose -f ./docker-compose.yml --env-file=$(ENV_FILE) up -d'
 
 stop-avs-in-docker:
 	 sudo docker compose -f ./docker-compose.yml down
