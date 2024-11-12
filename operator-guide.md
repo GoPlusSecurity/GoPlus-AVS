@@ -144,7 +144,8 @@ OPERATOR_STATE_RETRIEVER=0x5ce26317F7edCBCBD1a569629af5DC41c1622045
 ### To opt-in
 
 💡 Before you opt-in to GoPlus AVS, please ensure that you have the right infrastructure to keep the operator up and running. Non-performing AVS operators may be subjected to ejection out of GoPlus AVS.
-💡 The ECDSA private key is used **only once** in `reg-with-avs` and `dereg-with-avs` steps, so for security reasons, we recommend removing the ECDSA keystore file after completing these operations.
+
+> The ECDSA private key is used **only once** in `reg-with-avs` and `dereg-with-avs` steps, so for security reasons, we recommend removing the ECDSA keystore file after completing these operations.
 
 1. Run `export BLS_KEY_PASSWORD=...` to export the password to BLS keystore file.
 2. Run `make build-avs` to compile AVS.
@@ -157,17 +158,36 @@ OPERATOR_STATE_RETRIEVER=0x5ce26317F7edCBCBD1a569629af5DC41c1622045
 If you no longer want to run the AVS, you can opt out by running `make dereg-with-avs`.
 
 
-## Start AVS
-> The AVS runtime environment can be either as a standalone process or using Docker Compose; Docker Compose is recommended.
+## Start GoPlus AVS
+
+> GoPlus AVS runtime can be deployed in two ways: as a standalone process or via Docker Compose (recommended).
+> When using Docker Compose, all services operate in **Host network** mode. Please ensure the following ports are available on your host machine:
+> - API_PORT (configurable)
+> - 9090 (metrics)
+> - 3000 (monitoring)
+
+### Mainnet configuration
 
 1. Start with Docker Compose:
     1. Run `export BLS_KEY_PASSWORD=...` to export the password to BLS keystore file.
-    2. Run `make build-avs-docker` to build the image.
-    3. Run `sudo make run-avs-docker` to start. This also starts Prometheus and Grafana. All components use the **Host** network mode, so make sure the API_PORT, 9090, and 3000 ports in the configuration are not in use.
+    2. Run `make build-avs-docker-mainnet` to build the AVS Docker image. 
+    3. Run `make run-avs-docker` to start. This also starts Prometheus and Grafana.
 
 2. Start as a standalone process:
     1. Run `export BLS_KEY_PASSWORD=...` to export the password to BLS keystore file.
-    2. Run `sudo docker login -u goplusavs -p dckr_pat_wRhsTj4U7REe7IFnrgFkAOswjaM` to log in.
+    2. Run `sudo docker login -u goplusavs -p dckr_pat_wRhsTj4U7REe7IFnrgFkAOswjaM` to log in. 
+    3. Run `make run-avs` to start.
+
+### Testnet configuration
+
+1. Start with Docker Compose:
+    1. Run `export BLS_KEY_PASSWORD=...` to export the password to BLS keystore file.
+    2. Run `make build-avs-docker-testnet` to build the AVS Docker image. 
+    3. Run `make run-avs-docker` to start. This also starts Prometheus and Grafana. All components use the **Host** network mode, so make sure the API_PORT, 9090, and 3000 ports in the configuration are not in use.
+
+2. Start as a standalone process:
+    1. Run `export BLS_KEY_PASSWORD=...` to export the password to BLS keystore file.
+    2. Run `sudo docker login -u joker1034 -p dckr_pat_MH5qjNWvS3iahu8--rK4wW7NbEM` to log in.
     3. Run `make run-avs` to start.
 
 
