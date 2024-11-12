@@ -31,16 +31,17 @@ Beacon Chain Ether and all ETH-based LSTs supported by EigenLayer are supported 
 
 1. Follow EigenLayer guide and Install EigenLayer CLI
 2. Generate ECDSA and BLS keypair using the following command
+
     ```bash
     eigenlayer operator keys create --key-type ecdsa [keyname]
     eigenlayer operator keys create --key-type bls [keyname]
     ```
 
-💡 **Please ensure you backup your private keys to a safe location. By default, the encrypted keys will be stored in ~/.eigenlayer/operator_keys/**. Fund at least 0.3 ETH to the ECDSA address generated. It will be required for node registration in the later steps.
+> **Please ensure you backup your private keys to a safe location. By default, the encrypted keys will be stored in `~/.eigenlayer/operator_keys/`**. Fund at least 0.3 ETH to the ECDSA address generated. It will be required for node registration in the later steps.
 
 ## Register on EigenLayer as an operator
 
-💡 You may skip the following steps if you are already a registered operator on the EigenLayer testnet and mainnet.
+> You may skip the following steps if you are already a registered operator on the EigenLayer testnet.
 
 **You will need to do it once for testnet and once for mainnet.**
 
@@ -143,7 +144,7 @@ OPERATOR_STATE_RETRIEVER=0x5ce26317F7edCBCBD1a569629af5DC41c1622045
 
 ### To opt-in
 
-💡 Before you opt-in to GoPlus AVS, please ensure that you have the right infrastructure to keep the operator up and running. Non-performing AVS operators may be subjected to ejection out of GoPlus AVS.
+> Before you opt-in to GoPlus AVS, please ensure that you have the right infrastructure to keep the operator up and running. Non-performing AVS operators may be subjected to ejection out of GoPlus AVS.
 
 > The ECDSA private key is used **only once** in `reg-with-avs` and `dereg-with-avs` steps, so for security reasons, we recommend removing the ECDSA keystore file after completing these operations.
 
@@ -151,7 +152,7 @@ OPERATOR_STATE_RETRIEVER=0x5ce26317F7edCBCBD1a569629af5DC41c1622045
 2. Run `make build-avs` to compile AVS.
 3. Run `make reg-with-avs` to register. During execution, the user will be prompted to enter the path to the ECDSA keystore file and corresponding password.
 
-💡 It may take a few minutes for EigenLayer AVS and operator page to be updated This is an automatic process.
+> It may take a few minutes for EigenLayer AVS and operator page to be updated This is an automatic process.
 
 ### To opt-out
 
@@ -183,7 +184,7 @@ If you no longer want to run the AVS, you can opt out by running `make dereg-wit
 1. Start with Docker Compose:
     1. Run `export BLS_KEY_PASSWORD=...` to export the password to BLS keystore file.
     2. Run `make build-avs-docker-testnet` to build the AVS Docker image. 
-    3. Run `make run-avs-docker` to start. This also starts Prometheus and Grafana. All components use the **Host** network mode, so make sure the API_PORT, 9090, and 3000 ports in the configuration are not in use.
+    3. Run `make run-avs-docker` to start. This also starts Prometheus and Grafana.
 
 2. Start as a standalone process:
     1. Run `export BLS_KEY_PASSWORD=...` to export the password to BLS keystore file.
@@ -197,6 +198,6 @@ If you no longer want to run the AVS, you can opt out by running `make dereg-wit
 
 2. Secware Running Status
     - AVS will periodically request Secware configuration from the Gateway and run Secware in Docker. It also regularly reports Secware's health status to the Gateway.
-    - Run `sudo docker compose ls` to view Secware’s running status.
+    - Run `sudo docker compose ls` to view Secware's running status.
 
-If AVS is running in a Docker Compose environment, you can access Grafana at `http://{OPERATOR_URL}:3000` to view monitoring data. The default username and password are `goplus_avs/admin`."
+If AVS is running in a Docker Compose environment, you can access Grafana at `http://{OPERATOR_URL}:3000` to view monitoring data. The default username and password are `goplus_avs/admin`.
