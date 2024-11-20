@@ -209,4 +209,5 @@ If AVS is running in a Docker Compose environment, you can access Grafana at `ht
 ## FAQ
 
 1. When attempting to deploy GoPlus AVS to my Kubernetes environment, why do I receive the error `secware config length: 4`?
+
    Currently, our AVS relies on **Docker Compose** for container orchestration and is not natively compatible with Kubernetes environments. While adapting it would require significant architectural changes, we're considering adding Kubernetes support based on operator feedback.
